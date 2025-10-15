@@ -1,0 +1,47 @@
+// ---------------------------------------------
+// Implementacja animacji w bibliotece freeGLUT
+// ---------------------------------------------
+
+
+// ---------------------------------------------
+// Sposob 1
+// ---------------------------------------------
+
+void Animation ( int keyframe )
+{
+	glutPostRedisplay ();
+	glutTimerFunc (100 , Animation ,0);
+}
+
+int main ()
+{
+	...
+	glutTimerFunc (100 , Animation , 0);
+	glutMainLoop ();
+}
+
+
+// ---------------------------------------------
+// Sposob 2
+// ---------------------------------------------
+
+# include <time.h>
+
+clock_t last_T = 0;
+void Animation ()
+{
+	clock_t now_T = clock ();
+	double delta_T = now_T - last_T ;
+	if ( delta_T > 100) // miliseconds
+	{
+		glutPostRedisplay ();
+		last_T = now_T ;
+	}
+}
+
+int main ()
+{
+	...
+	glutIdleFunc ( Animation );
+	glutMainLoop ();
+}
