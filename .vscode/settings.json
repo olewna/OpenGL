@@ -1,7 +1,11 @@
 {
-    "files.associations": {
-        ".fantomasignore": "ignore",
-        "vector": "cpp",
-        "xstring": "cpp"
-    }
+  "files.associations": {
+    ".fantomasignore": "ignore",
+    "vector": "cpp",
+    "xstring": "cpp",
+    "cmath": "cpp",
+    "iterator": "cpp",
+    "memory": "cpp",
+    "xutility": "cpp"
+  }
 }
