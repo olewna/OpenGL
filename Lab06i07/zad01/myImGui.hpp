@@ -16,8 +16,12 @@ bool lightingEnabled = true;
 bool animateLight = false;
 float lightAngle = 0.0f;
 int shadingModel = 0;
-extern LightParam myLight;
-// ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+int lightMode = 0; // 0 - punktowe 1 kierunkunowe
+extern LightParam myLight1;
+
+extern int activeLights;
+extern const int MAX_LIGHTS;
+extern LightParam lights[];
 
 // Naglowki funkcji
 void ImGui_Init(GLFWwindow *window);
@@ -96,36 +100,41 @@ void ImGui_Display()
         ImGui::Combo("Shading Model", &shadingModel, shadingItems, IM_ARRAYSIZE(shadingItems));
         ImGui::Checkbox("Lighting", &lightingEnabled);
         ImGui::Checkbox("Lighting animation", &animateLight);
-        ImGui::Text("Light pos: %.2f %.2f %.2f",
-                    myLight.Position.x,
-                    myLight.Position.y,
-                    myLight.Position.z);
-        // ImGui::Checkbox("Animation", &show_animation);
 
-        // ImGui::SliderFloat("float", &f, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
-        // ImGui::ColorEdit3("clear color", (float *)&clear_color); // Edit 3 floats representing a color
+        ImGui::Text("Light type:");
+        ImGui::RadioButton("Point", &lightMode, 0);
+        ImGui::RadioButton("Directional", &lightMode, 1);
 
-        // if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
-        // ImGui::SameLine();
-        // ImGui::Text("counter = %d", counter);
-        // TODO
-        // ImGui::SliderFloat("Quadratic", &attenuationQuadratic, 0.0f, 0.1f);
-        // myLight.Attenuation.z = attenuationQuadratic;
+        ImGui::SliderInt("Amount of lights:", &activeLights, 1, MAX_LIGHTS);
+        for (int i = 0; i < activeLights; i++)
+        {
+            if (lightMode == 1 && i == 0)
+            {
+                ImGui::ColorEdit3("Ambient", glm::value_ptr(lights[i].Ambient));
+                ImGui::ColorEdit3("Diffuse", glm::value_ptr(lights[i].Diffuse));
+                ImGui::ColorEdit3("Specular", glm::value_ptr(lights[i].Specular));
+                ImGui::DragFloat3("Direction", glm::value_ptr(lights[i].Direction), 0.1f);
+            }
+            else if (lightMode == 0)
+            {
+                std::string name = "Light# " + std::to_string(i + 1);
+                if (ImGui::TreeNode(name.c_str()))
+                {
+                    ImGui::ColorEdit3("Ambient", glm::value_ptr(lights[i].Ambient));
+                    ImGui::ColorEdit3("Diffuse", glm::value_ptr(lights[i].Diffuse));
+                    ImGui::ColorEdit3("Specular", glm::value_ptr(lights[i].Specular));
+                    ImGui::DragFloat3("Attenuation", glm::value_ptr(lights[i].Attenuation), 0.01f);
+                    ImGui::DragFloat3("Position", glm::value_ptr(lights[i].Position), 0.1f);
+
+                    ImGui::TreePop();
+                }
+            }
+        }
 
         ImGui::Text("Time: %.1f ", Time);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
         ImGui::End();
     }
-
-    // 3. Show another simple window.
-    // if (show_another_window)
-    // {
-    //     ImGui::Begin("Another Window", &show_another_window); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-    //     ImGui::Text("Hello from another window!");
-    //     if (ImGui::Button("Close Me"))
-    //         show_another_window = false;
-    //     ImGui::End();
-    // }
 
     // Zamykanie procesu renderowania ImGui
     ImGui::Render();

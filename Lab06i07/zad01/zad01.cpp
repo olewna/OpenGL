@@ -25,6 +25,7 @@ struct LightParam
     glm::vec3 Specular;
     glm::vec3 Attenuation;
     glm::vec3 Position; // Direction dla kierunkowego
+    glm::vec3 Direction;
 };
 // Struktura materialu obiektu
 struct MaterialParam
@@ -44,14 +45,51 @@ struct MaterialParam
 // ----------------------------------------------
 
 // Przykladowe swiatlo punktowe
-LightParam myLight = {
-    glm::vec3(0.1, 0.1, 0.1), // ambient
-    glm::vec3(1.0, 1.0, 1.0), // diffuse
-    glm::vec3(1.0, 1.0, 1.0), // specular
-    glm::vec3(1.0, 0.0, 0.0), // attenuation
-    glm::vec3(0.0, 6.0, 0.0)  // position
+LightParam myLight1 = {
+    glm::vec3(0.1, 0.1, 0.1),    // ambient
+    glm::vec3(1.0, 1.0, 1.0),    // diffuse
+    glm::vec3(1.0, 1.0, 1.0),    // specular
+    glm::vec3(1.0, 0.0, 0.0),    // attenuation
+    glm::vec3(0.0, 6.0, 0.0),    // position
+    glm::vec3(0.0f, -1.0f, 0.0f) // direction
+};
+LightParam myLight2 = {
+    glm::vec3(0.1, 0.1, 0.1),    // ambient
+    glm::vec3(1.0, 0.0, 0.0),    // diffuse
+    glm::vec3(1.0, 1.0, 1.0),    // specular
+    glm::vec3(1.0, 0.0, 0.0),    // attenuation
+    glm::vec3(2.0, 6.0, 2.0),    // position
+    glm::vec3(0.0f, -1.0f, 0.0f) // direction
+};
+LightParam myLight3 = {
+    glm::vec3(0.1, 0.1, 0.1),    // ambient
+    glm::vec3(0.0, 1.0, 0.0),    // diffuse
+    glm::vec3(1.0, 1.0, 1.0),    // specular
+    glm::vec3(1.0, 0.0, 0.0),    // attenuation
+    glm::vec3(2.0, 6.0, -2.0),   // position
+    glm::vec3(0.0f, -1.0f, 0.0f) // direction
+};
+LightParam myLight4 = {
+    glm::vec3(0.1, 0.1, 0.1),    // ambient
+    glm::vec3(0.0, 0.0, 1.0),    // diffuse
+    glm::vec3(1.0, 1.0, 1.0),    // specular
+    glm::vec3(1.0, 0.0, 0.0),    // attenuation
+    glm::vec3(-2.0, 6.0, 2.0),   // position
+    glm::vec3(0.0f, -1.0f, 0.0f) // direction
+};
+LightParam myLight5 = {
+    glm::vec3(0.1, 0.1, 0.1),    // ambient
+    glm::vec3(1.0, 0.0, 1.0),    // diffuse
+    glm::vec3(1.0, 1.0, 1.0),    // specular
+    glm::vec3(1.0, 0.0, 0.0),    // attenuation
+    glm::vec3(-2.0, 6.0, -2.0),  // position
+    glm::vec3(0.0f, -1.0f, 0.0f) // direction
 };
 
+const int MAX_LIGHTS = 5;
+int activeLights = 2;
+
+LightParam lights[MAX_LIGHTS] = {myLight1, myLight2, myLight3, myLight4, myLight5};
 // ----------------------------------------------
 // (2) MATERIAL
 // ----------------------------------------------
@@ -67,7 +105,7 @@ MaterialParam myMaterialBlysk = {
     glm::vec3(0.2, 0.2, 0.2), // ambient
     glm::vec3(1.0, 1.0, 1.0), // diffuse
     glm::vec3(1.0, 1.0, 1.0), // specular
-    1000.0                    // shininess
+    256.0                     // shininess
 };
 
 // =======================================================
@@ -125,17 +163,18 @@ public:
     }
 
     // Przeslanie parametrow oswietlenia do shadera
-    void sendLightParameters(LightParam light)
+    void sendLightParameters(const std::string &name, LightParam light)
     {
         // pobranie id aktualnego programu
         GLint programId = idProgram;
         glGetIntegerv(GL_CURRENT_PROGRAM, &programId);
 
-        glUniform3fv(glGetUniformLocation(programId, "myLight.Ambient"), 1, glm::value_ptr(light.Ambient));
-        glUniform3fv(glGetUniformLocation(programId, "myLight.Diffuse"), 1, glm::value_ptr(light.Diffuse));
-        glUniform3fv(glGetUniformLocation(programId, "myLight.Specular"), 1, glm::value_ptr(light.Specular));
-        glUniform3fv(glGetUniformLocation(programId, "myLight.Attenuation"), 1, glm::value_ptr(light.Attenuation));
-        glUniform3fv(glGetUniformLocation(programId, "myLight.Position"), 1, glm::value_ptr(light.Position));
+        glUniform3fv(glGetUniformLocation(programId, (name + "Ambient").c_str()), 1, glm::value_ptr(light.Ambient));
+        glUniform3fv(glGetUniformLocation(programId, (name + "Diffuse").c_str()), 1, glm::value_ptr(light.Diffuse));
+        glUniform3fv(glGetUniformLocation(programId, (name + "Specular").c_str()), 1, glm::value_ptr(light.Specular));
+        glUniform3fv(glGetUniformLocation(programId, (name + "Attenuation").c_str()), 1, glm::value_ptr(light.Attenuation));
+        glUniform3fv(glGetUniformLocation(programId, (name + "Position").c_str()), 1, glm::value_ptr(light.Position));
+        glUniform3fv(glGetUniformLocation(programId, (name + "Direction").c_str()), 1, glm::value_ptr(light.Direction));
     }
 
     // Przeslanie parametrow materialow do shadera
@@ -436,7 +475,7 @@ void DisplayScene()
 
     glownyProgram.SetCameraUniform();
 
-    glownyProgram.SetLightingUniforms();
+    glownyProgram.SetLightingUniforms(); // właczanie wylaczanie swiatla 1
 
     if (animateLight)
     {
@@ -444,18 +483,27 @@ void DisplayScene()
 
         float radius = 6.0f;
 
-        myLight.Position.x = radius * cos(lightAngle);
-        myLight.Position.z = radius * sin(lightAngle);
-        myLight.Position.y = 6.0f;
+        lights[0].Position.x = radius * cos(lightAngle);
+        lights[0].Position.z = radius * sin(lightAngle);
+        lights[0].Position.y = 6.0f;
     }
-    else
-    {
-        myLight.Position.x = 0.0f;
-        myLight.Position.z = 0.0f;
-        myLight.Position.y = 6.0f;
-    }
+    // else
+    // {
+    //     myLight.Position.x = 0.0f;
+    //     myLight.Position.z = 0.0f;
+    //     myLight.Position.y = 6.0f;
+    // }
 
-    glownyProgram.sendLightParameters(myLight);
+    glownyProgram.SetInt("lightMode", lightMode);
+
+    glownyProgram.SetInt("activeLights", activeLights);
+
+    for (int i = 0; i < activeLights; i++)
+    {
+        std::string base = "lights[" + std::to_string(i) + "].";
+
+        glownyProgram.sendLightParameters(base, lights[i]);
+    }
 
     glownyProgram.SetShadingProgram(); // imgui shading model wybieranie
 
@@ -487,16 +535,23 @@ void DisplayScene()
     glownyProgram.sendMaterialParameters(myMaterialBlysk);
     monkey.Draw(glownyProgram);
 
-    float sphereScale = 0.1f;
+    if (lightMode == 0)
+    {
+        float sphereScale = 0.1f;
+        glownyProgram.SetDrawLightSphere(true);
 
-    glm::mat4 matLight = glm::mat4(1.0f);
-    matLight = glm::translate(matLight, myLight.Position);
-    matLight = glm::scale(matLight, glm::vec3(sphereScale));
+        for (int i = 0; i < activeLights; i++)
+        {
+            glm::mat4 matLight = glm::mat4(1.0f);
+            matLight = glm::translate(matLight, lights[i].Position);
+            matLight = glm::scale(matLight, glm::vec3(sphereScale));
+            glownyProgram.SetInt("lightIndexToDraw", i);
 
-    glownyProgram.SetMat4("matModel", matLight);
-    glownyProgram.SetDrawLightSphere(true);
-    lightSphere.Draw(glownyProgram);
-    glownyProgram.SetDrawLightSphere(false);
+            glownyProgram.SetMat4("matModel", matLight);
+            lightSphere.Draw(glownyProgram);
+        }
+        glownyProgram.SetDrawLightSphere(false);
+    }
 
     glownyProgram.UnUse();
 }

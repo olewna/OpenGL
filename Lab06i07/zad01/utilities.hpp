@@ -91,6 +91,10 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 // funkcja zwrotna do obslugi scrolla myszy
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
+	ImGuiIO &io = ImGui::GetIO();
+	if (io.WantCaptureMouse)
+		return;
+
 	float zoomSpeed = 1.0f;
 
 	// zoom closer (scroll up) → yoffset > 0
@@ -103,13 +107,17 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 	if (CameraDistance > 100.0f)
 		CameraDistance = 100.0f;
 
-	printf("CameraDistance = %f\n", CameraDistance);
+	// printf("CameraDistance = %f\n", CameraDistance);
 }
 
 // --------------------------------------------------------------
 // funkcja zwrotna do obslugi ruchu kursora myszy
 void cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
 {
+	ImGuiIO &io = ImGui::GetIO();
+	if (io.WantCaptureMouse)
+		return;
+
 	if (MousePressed && MouseButton == GLFW_MOUSE_BUTTON_LEFT)
 	{
 		float sensitivity = 0.2f;
@@ -134,6 +142,10 @@ void cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
 // funkcja zwrotna do obslugi klawiszy myszy
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
+	ImGuiIO &io = ImGui::GetIO();
+	if (io.WantCaptureMouse)
+		return;
+
 	if (action == GLFW_PRESS)
 	{
 		MousePressed = true;
@@ -152,6 +164,10 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 // funkcja zwrotna do obslugi klawiatury
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+	ImGuiIO &io = ImGui::GetIO();
+	if (io.WantCaptureKeyboard)
+		return;
+
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 
