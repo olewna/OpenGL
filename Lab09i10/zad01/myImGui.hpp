@@ -12,16 +12,13 @@
 // ImGui ImGui ImGui ImGui ImGui ImGui
 // -----------------------------------
 
+#include "LightParam.hpp"
+
 bool lightingEnabled = true;
 bool animateLight = false;
 float lightAngle = 0.0f;
 int shadingModel = 0;
 int lightMode = 0; // 0 - punktowe 1 kierunkunowe
-extern LightParam myLight1;
-
-extern int activeLights;
-extern const int MAX_LIGHTS;
-extern LightParam lights[];
 
 // Naglowki funkcji
 void ImGui_Init(GLFWwindow *window);
