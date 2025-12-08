@@ -26,8 +26,6 @@ struct LightParam
 	vec3 Position; // Direction dla kierunkowego
 	vec3 Direction;
 };
-// Przykladowe swiatlo
-// uniform LightParam myLight;
 
 // Struktura parametrow materialu
 struct MaterialParam
@@ -37,9 +35,12 @@ struct MaterialParam
 	vec3 Specular;
 	float Shininess;
 };
+
 // Przykladowy material
 uniform MaterialParam myMaterial;
 uniform int activeLights;
+
+// światła
 uniform LightParam lights[MAX_LIGHTS];
 uniform int lightIndexToDraw;
 

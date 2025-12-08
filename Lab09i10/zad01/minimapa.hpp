@@ -69,9 +69,6 @@ void InitializeMiniMap()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
     glBindVertexArray(0);
-
-    minimapProgram.Init();
-    minimapProgram.LoadShaders("minimap_vertex.glsl", "minimap_fragment.glsl");
 }
 
 // =======================================================
@@ -86,6 +83,9 @@ void RenderMiniMap()
     glViewport(0, 0, minimapSize, minimapSize);
     glBindFramebuffer(GL_FRAMEBUFFER, fboMiniMap);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    minimapProgram.Init();
+    minimapProgram.LoadShaders("shaders/minimap/minimap_vertex.glsl", "shaders/minimap/minimap_fragment.glsl");
 
     // widok z góry
     glownyProgram.Use();

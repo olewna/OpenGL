@@ -63,7 +63,7 @@ LightParam myLight5 = {
 };
 
 const int MAX_LIGHTS = 5;
-int activeLights = 2;
+int activeLights = 1;
 
 LightParam lights[MAX_LIGHTS] = {myLight1, myLight2, myLight3, myLight4, myLight5};
 

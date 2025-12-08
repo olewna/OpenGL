@@ -11,16 +11,19 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+// SCREEN SIZE
+int SCREEN_WIDTH = 800;
+int SCREEN_HEIGHT = 600;
+
 // GŁOWNA KAMERA
-glm::mat4 matProj, matView;
+glm::mat4 matProj,
+    matView;
 
 // Zmienna czas do animacji
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 float time = 0.0f;
 float Time = 0.0;
-
-bool showMiniMap = true; // kontrola przez ImGui
 
 #include "objloader.hpp"
 #include "myImGui.hpp"
@@ -38,6 +41,7 @@ CMesh tower;
 CMesh lightSphere;
 
 #include "minimapa.hpp"
+#include "postprocessing.hpp"
 
 // =======================================================
 // INIT
@@ -49,7 +53,7 @@ void Initialize()
     glClearColor(0, 0, 0, 1.0f);
 
     glownyProgram.Init();
-    glownyProgram.LoadShaders("vertex.glsl", "fragment.glsl");
+    glownyProgram.LoadShaders("shaders/main/vertex.glsl", "shaders/main/fragment.glsl");
 
     plane.CreateFromOBJ("objs/ground-large.obj");
     plane.LoadTexture("assets/grass.jpg");
@@ -66,6 +70,9 @@ void Initialize()
 
     // INICJALIZACJA MINIMAPY
     InitializeMiniMap();
+
+    // INICJALIZACJA POSTPROCESSINGU
+    InitPostProcess();
 }
 
 // =======================================================
@@ -165,6 +172,10 @@ void DisplayScene()
 
     // wyświetlenie minimapy na ekranie
     DisplayMiniMapOverlay();
+
+    // render postprocessing
+    RenderSceneToFBO();
+    RenderPostProcess();
 }
 
 // =======================================================
@@ -185,7 +196,7 @@ int main()
     // IMGUI
     float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
 
-    GLFWwindow *window = glfwCreateWindow(800, 600, "lab06i07zad01", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "lab06i07zad01", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "okno error xd!" << std::endl;

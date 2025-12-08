@@ -20,6 +20,11 @@ float lightAngle = 0.0f;
 int shadingModel = 0;
 int lightMode = 0; // 0 - punktowe 1 kierunkunowe
 
+bool showMiniMap = false; // kontrola minimapy
+
+int currentEffect = 0;           // postprocessing efekt
+bool showPostprocessing = false; // kontrola postprocessingu
+
 // Naglowki funkcji
 void ImGui_Init(GLFWwindow *window);
 void ImGui_Display();
@@ -76,32 +81,33 @@ void ImGui_Init(GLFWwindow *window)
 // -----------------------------------
 void ImGui_Display()
 {
-    // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     ImGuiIO &io = ImGui::GetIO();
 
-    // 1. Show demo
-    // if (show_demo_window)
-    //     ImGui::ShowDemoWindow(&show_demo_window);
-
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+    /// -----------------------------------
+    /// OKNO IMGUI NAJWAŻNIEJSZE!!!!!!
+    /// -----------------------------------
     {
         static float f = 0.0f;
         static int counter = 0;
 
+        // RODZAJ CIENIOWANIA
         const char *shadingItems[] = {"Phong", "Blinn-Phong"};
-
         ImGui::Begin("Lighting lab06&07 opengl glfw");
         ImGui::Combo("Shading Model", &shadingModel, shadingItems, IM_ARRAYSIZE(shadingItems));
+
+        // WŁACZANIE SWIATLA I ANIMACJI
         ImGui::Checkbox("Lighting", &lightingEnabled);
         ImGui::Checkbox("Lighting animation", &animateLight);
 
+        // TYP ŚWIATŁA NUMER 1
         ImGui::Text("Light type:");
         ImGui::RadioButton("Point", &lightMode, 0);
         ImGui::RadioButton("Directional", &lightMode, 1);
 
+        // ŚWIATŁA
         ImGui::SliderInt("Amount of lights:", &activeLights, 1, MAX_LIGHTS);
         for (int i = 0; i < activeLights; i++)
         {
@@ -128,7 +134,16 @@ void ImGui_Display()
             }
         }
 
+        // POKAŻ MINIMAPE
         ImGui::Checkbox("Show minimap", &showMiniMap);
+
+        // WYBIERZ RODZAJ POSTPROCESSINGU
+        ImGui::Text("Postprocessing type:");
+        ImGui::RadioButton("NEGATYW", &currentEffect, 0);
+        ImGui::RadioButton("SHARPEN", &currentEffect, 1);
+
+        // POKAŻ POSTPROCESSING
+        ImGui::Checkbox("Show postprocessing", &showPostprocessing);
 
         ImGui::Text("Time: %.1f ", Time);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
@@ -138,11 +153,8 @@ void ImGui_Display()
     // Zamykanie procesu renderowania ImGui
     ImGui::Render();
 
-    // Renderowanie do framebuffera
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    // Update and Render additional Platform Windows
-    // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
-    //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         GLFWwindow *backup_current_context = glfwGetCurrentContext();
