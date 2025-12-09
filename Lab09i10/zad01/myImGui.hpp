@@ -18,12 +18,14 @@ bool lightingEnabled = true;
 bool animateLight = false;
 float lightAngle = 0.0f;
 int shadingModel = 0;
-int lightMode = 0; // 0 - punktowe 1 kierunkunowe
+int lightMode = 1; // 0 - punktowe 1 kierunkunowe
 
 bool showMiniMap = false; // kontrola minimapy
 
 int currentEffect = 0;           // postprocessing efekt
 bool showPostprocessing = false; // kontrola postprocessingu
+
+bool showShadows = true;
 
 // Naglowki funkcji
 void ImGui_Init(GLFWwindow *window);
@@ -116,6 +118,7 @@ void ImGui_Display()
                 ImGui::ColorEdit3("Ambient", glm::value_ptr(lights[i].Ambient));
                 ImGui::ColorEdit3("Diffuse", glm::value_ptr(lights[i].Diffuse));
                 ImGui::ColorEdit3("Specular", glm::value_ptr(lights[i].Specular));
+                ImGui::DragFloat3("Position", glm::value_ptr(lights[i].Position), 0.1f);
                 ImGui::DragFloat3("Direction", glm::value_ptr(lights[i].Direction), 0.1f);
             }
             else if (lightMode == 0)
@@ -144,6 +147,9 @@ void ImGui_Display()
 
         // POKAŻ POSTPROCESSING
         ImGui::Checkbox("Show postprocessing", &showPostprocessing);
+
+        // POKAŻ cienie directional
+        ImGui::Checkbox("Show directional shadows", &showShadows);
 
         ImGui::Text("Time: %.1f ", Time);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);

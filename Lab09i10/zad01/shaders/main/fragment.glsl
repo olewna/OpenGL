@@ -1,6 +1,6 @@
 #version 330 core
 
-#define MAX_LIGHTS 8
+#define MAX_LIGHTS 5
 
 in vec3 inPosition;
 in vec2 TexCoord;
@@ -8,17 +8,21 @@ in vec3 inNormal;
 
 out vec4 FragColor;
 
-uniform sampler2D tex0;
+uniform sampler2D tex0; // tekstury obiektow na scene
+uniform sampler2D texture_shadowMap; // mapa cieni
+
+in vec4 fragPosLight;
+
 uniform vec3 cameraPos;
 uniform int shadingModel;
 uniform bool uLightingEnabled;
 uniform int uDrawLightSphere;
-
 uniform int lightMode;
 
+uniform int showShadows;
+
 // Struktura parametrow swiatla
-struct LightParam
-{
+struct LightParam{
 	vec3 Ambient;
 	vec3 Diffuse;
 	vec3 Specular;
@@ -28,8 +32,7 @@ struct LightParam
 };
 
 // Struktura parametrow materialu
-struct MaterialParam
-{
+struct MaterialParam{
 	vec3 Ambient;
 	vec3 Diffuse;
 	vec3 Specular;
@@ -111,14 +114,35 @@ vec3 calculateDirectionalLight(MaterialParam myMaterial, LightParam myLight)
     return ambient + diffuse + specular;
 }
 
+// Shadow calculation
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    if (showShadows == 0) {
+        return 0.0;
+    }
+
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords*0.5 + 0.5;
+
+    // if(projCoords.z > 1.0) return 0.0;
+
+    float closestDepth = texture(texture_shadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+    float bias = max(0.004*(1.0-dot(inNormal,normalize(lights[0].Direction))), 0.001);
+
+    float shadow = (currentDepth - bias > closestDepth) ? 1.0 : 0.0;
+
+    // vec4 texColor = texture(tex0, TexCoord);
+    // if(texColor.a < 0.5) shadow = 0.0;
+
+    return shadow;
+}
+
 void main()
 {
     vec3 baseColor = texture(tex0, TexCoord).rgb;
 
 	if (uDrawLightSphere == 1) {
-        // for (int i = 0; i < activeLights; i++) {
-		//     lightColor = calculatePointLight(myMaterial, light[i]);
-        // }
 		FragColor = vec4(lights[lightIndexToDraw].Diffuse, 1.0);   // kolor światła
 		return;
 	}
@@ -139,7 +163,17 @@ void main()
 		lightColor = calculateDirectionalLight(myMaterial, myLight);
 	}
 
-    vec3 result = lightColor * baseColor;
+    vec3 result;
+
+    // cień
+    if (lightMode == 1) {
+        vec4 fragPosLightSpace = fragPosLight;
+        float shadow = ShadowCalculation(fragPosLightSpace);
+
+        result = (lights[0].Ambient + (1.0 - shadow) * lightColor) * baseColor;
+    } else {
+        result = lightColor * baseColor;
+    }
 
     FragColor = vec4(result, 1.0);
 }

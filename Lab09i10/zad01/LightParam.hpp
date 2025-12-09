@@ -22,12 +22,12 @@ struct LightParam
 
 // Przykladowe swiatlo punktowe
 LightParam myLight1 = {
-    glm::vec3(0.1, 0.1, 0.1),    // ambient
-    glm::vec3(1.0, 1.0, 1.0),    // diffuse
-    glm::vec3(1.0, 1.0, 1.0),    // specular
-    glm::vec3(1.0, 0.0, 0.0),    // attenuation
-    glm::vec3(0.0, 6.0, 0.0),    // position
-    glm::vec3(0.0f, -1.0f, 0.0f) // direction
+    glm::vec3(0.1, 0.1, 0.1),      // ambient
+    glm::vec3(1.0, 1.0, 1.0),      // diffuse
+    glm::vec3(1.0, 1.0, 1.0),      // specular
+    glm::vec3(1.0, 0.0, 0.0),      // attenuation
+    glm::vec3(0.0f, 5.0f, -10.0f), // position
+    glm::vec3(0.2f, -0.8f, 1.1f)   // direction
 };
 LightParam myLight2 = {
     glm::vec3(0.1, 0.1, 0.1),    // ambient

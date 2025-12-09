@@ -27,10 +27,12 @@ float Time = 0.0;
 
 #include "objloader.hpp"
 #include "myImGui.hpp"
-#include "utilities.hpp"
 
 #include "LightParam.hpp"
 #include "MaterialsParam.hpp"
+
+#include "utilities.hpp"
+
 #include "CProgram.hpp"
 #include "CMesh.hpp"
 
@@ -42,6 +44,7 @@ CMesh lightSphere;
 
 #include "minimapa.hpp"
 #include "postprocessing.hpp"
+#include "shadowMapping.hpp"
 
 // =======================================================
 // INIT
@@ -73,6 +76,9 @@ void Initialize()
 
     // INICJALIZACJA POSTPROCESSINGU
     InitPostProcess();
+
+    // SHADOW MAP
+    InitShadowMap();
 }
 
 // =======================================================
@@ -89,7 +95,16 @@ void DisplayScene()
 
     UpdateOrbitCamera();
 
+    // render shadowmap
+    DirectionalLightCamera();
+    if (showShadows)
+    {
+        RenderShadowMap();
+        glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    }
+
     glownyProgram.Use();
+    glownyProgram.SetInt("showShadows", showShadows ? 1 : 0);
 
     glownyProgram.SetCameraUniform();
 
@@ -118,6 +133,17 @@ void DisplayScene()
     }
 
     glownyProgram.SetShadingProgram(); // imgui shading model wybieranie
+
+    if (showShadows)
+    {
+        RenderShadowMapOnScreen();
+    }
+    // else
+    // {
+    //     // odłączanie teksturę aby shader nie korzystał z shadow mapy
+    //     glActiveTexture(GL_TEXTURE2);
+    //     glBindTexture(GL_TEXTURE_2D, 0);
+    // }
 
     time += deltaTime;
 
@@ -196,7 +222,7 @@ int main()
     // IMGUI
     float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
 
-    GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "lab06i07zad01", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "lab09i10zad01", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "okno error xd!" << std::endl;

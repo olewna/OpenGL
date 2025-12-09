@@ -21,11 +21,10 @@
 #include <glm/glm.hpp>
 
 // Naglowek funkcji
-bool loadOBJ(const char * Filename, std::vector<glm::vec3> & out_coords, std::vector<glm::vec2> & out_uvs, std::vector<glm::vec3> & out_normals);
-
+bool loadOBJ(const char *Filename, std::vector<glm::vec3> &out_coords, std::vector<glm::vec2> &out_uvs, std::vector<glm::vec3> &out_normals);
 
 // Implementacja
-bool loadOBJ(const char * Filename, std::vector<glm::vec3> & out_coords, std::vector<glm::vec2> & out_uvs, std::vector<glm::vec3> & out_normals)
+bool loadOBJ(const char *Filename, std::vector<glm::vec3> &out_coords, std::vector<glm::vec2> &out_uvs, std::vector<glm::vec3> &out_normals)
 {
 	std::cout << "Loading OBJ file " << Filename << " ...";
 
@@ -39,7 +38,8 @@ bool loadOBJ(const char * Filename, std::vector<glm::vec3> & out_coords, std::ve
 	unsigned int numberTriangles = 0;
 
 	std::ifstream file(Filename);
-	if (!file.is_open()) {
+	if (!file.is_open())
+	{
 		std::cerr << "Can't open the file." << std::endl;
 		return false;
 	}
@@ -54,12 +54,12 @@ bool loadOBJ(const char * Filename, std::vector<glm::vec3> & out_coords, std::ve
 	std::string file_line, type;
 	while (std::getline(file, file_line))
 	{
-		if (file_line.empty()) continue;
+		if (file_line.empty())
+			continue;
 
 		// Obiekt String stream do parsowania
 		std::istringstream strLine(file_line);
 		strLine >> type;
-
 
 		// Wspolrzedne tekstur
 		if (type == "vt")
@@ -93,7 +93,6 @@ bool loadOBJ(const char * Filename, std::vector<glm::vec3> & out_coords, std::ve
 			unsigned int idx_uv[3];
 			unsigned int idx_vn[3];
 
-
 			// Format v/uv/vn v/uv/vn v/uv/vn
 			if (format_face == 6)
 			{
@@ -102,7 +101,7 @@ bool loadOBJ(const char * Filename, std::vector<glm::vec3> & out_coords, std::ve
 				// Format v//vn v//vn v//vn
 				if (file_line.find("//") != std::string::npos)
 				{
-					for (int i=0; i<3; i++)
+					for (int i = 0; i < 3; i++)
 					{
 						strLine >> idx_v[i];
 						strLine.ignore(1);
@@ -113,7 +112,7 @@ bool loadOBJ(const char * Filename, std::vector<glm::vec3> & out_coords, std::ve
 				}
 				else
 				{
-					for (int i=0; i<3; i++)
+					for (int i = 0; i < 3; i++)
 					{
 						strLine >> idx_v[i];
 						strLine.ignore(1);
@@ -124,40 +123,39 @@ bool loadOBJ(const char * Filename, std::vector<glm::vec3> & out_coords, std::ve
 				}
 
 				new_face = true;
-
 			}
 			else
-			// Format v/uv v/uv v/uv
-			if (format_face == 3)
-			{
-				for (int i=0; i<3; i++)
+				// Format v/uv v/uv v/uv
+				if (format_face == 3)
 				{
-					strLine >> idx_v[i];
-					strLine.ignore(1);
-					strLine >> idx_uv[i];
-					idx_vn[i] = 0;
-				}
+					for (int i = 0; i < 3; i++)
+					{
+						strLine >> idx_v[i];
+						strLine.ignore(1);
+						strLine >> idx_uv[i];
+						idx_vn[i] = 0;
+					}
 
-				new_face = true;
-			}
-			else
-			// Format v v v
-			if (format_face == 0)
-			{
-				for (int i=0; i<3; i++)
-				{
-					strLine >> idx_v[i];
-					idx_uv[i] = 0;
-					idx_vn[i] = 0;
+					new_face = true;
 				}
+				else
+					// Format v v v
+					if (format_face == 0)
+					{
+						for (int i = 0; i < 3; i++)
+						{
+							strLine >> idx_v[i];
+							idx_uv[i] = 0;
+							idx_vn[i] = 0;
+						}
 
-				new_face = true;
-			}
-			else
-			{
-				printf("Not supported format! Did you triangulate the object?\n");
-				return false;
-			}
+						new_face = true;
+					}
+					else
+					{
+						printf("Not supported format! Did you triangulate the object?\n");
+						return false;
+					}
 
 			// Dodajemy indeksy calego trojkata
 			if (new_face)
@@ -174,32 +172,29 @@ bool loadOBJ(const char * Filename, std::vector<glm::vec3> & out_coords, std::ve
 
 				numberTriangles++;
 			}
-
 		}
 		else
 		{
 			// Pomijamy inne linie pliku OBJ
 		}
-
 	}
 
 	// Na koniec eksportujemy wektor wspolrzednych
 	// uvalek oraz normalki
-	for (int i=0; i<numberTriangles*3; i++)
+	for (int i = 0; i < numberTriangles * 3; i++)
 	{
 		// Utworzenie danych wspolrzednych, uvlek i normalek
 		// z odpowiednich wektorow na podstawie indeksow
 		// pobranych w linii z prefiksem f
-		glm::vec3 vertex = uniq_vertices[ indices_v[i] ];
-		glm::vec2 uv = uniq_uvs[ indices_uv[i] ];
-		glm::vec3 normal = uniq_normals[ indices_vn[i] ];
+		glm::vec3 vertex = uniq_vertices[indices_v[i]];
+		glm::vec2 uv = uniq_uvs[indices_uv[i]];
+		glm::vec3 normal = uniq_normals[indices_vn[i]];
 
 		// Eksport
 		out_coords.push_back(vertex);
 		out_uvs.push_back(uv);
 		out_normals.push_back(normal);
 	}
-
 
 	file.close();
 	std::cout << " done.\n";

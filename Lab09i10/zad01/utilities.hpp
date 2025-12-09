@@ -55,7 +55,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 
 	// Aktualizacja macierzy rzutowania
 	if (windowHeight != 0)
-		matProj = glm::perspective(glm::radians(80.0f), windowWidth / (float)windowHeight, 0.1f, 50.0f);
+		matProj = glm::perspective(glm::radians(80.0f), (float)windowWidth / (float)windowHeight, 0.1f, 50.0f);
 
 	// Viewport
 	int display_w, display_h;
@@ -175,11 +175,19 @@ glm::mat4 UpdateOrbitCamera()
 	cameraPos.x = CameraTarget.x + CameraDistance * cos(radPitch) * sin(radYaw);
 	cameraPos.y = CameraTarget.y + CameraDistance * sin(radPitch);
 	cameraPos.z = CameraTarget.z + CameraDistance * cos(radPitch) * cos(radYaw);
+	// cameraPos = -10.0f * myLight1.Direction;
 
-	matView = glm::lookAt(cameraPos, CameraTarget, glm::vec3(0, 1, 0));
+	matView = glm::lookAt(cameraPos, CameraTarget, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	if (windowHeight != 0)
 		matProj = glm::perspective(glm::radians(80.0f), windowWidth / (float)windowHeight, 0.1f, 50.0f);
+
+	// printf("%f", cameraPos.x);
+	// printf(" ");
+	// printf("%f", cameraPos.y);
+	// printf(" ");
+	// printf("%f", cameraPos.z);
+	// printf("\n");
 
 	return matView;
 }
