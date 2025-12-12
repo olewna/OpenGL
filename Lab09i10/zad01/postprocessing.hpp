@@ -98,6 +98,10 @@ void RenderSceneToFBO()
     glownyProgram.UnUse();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    int width, height;
+    glfwGetFramebufferSize(glfwGetCurrentContext(), &width, &height);
+    glViewport(0, 0, width, height);
+    matProj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, 0.1f, 50.0f);
 }
 
 void RenderPostProcess()

@@ -11,6 +11,13 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#define __CHECK_FOR_ERRORS                                                                \
+    {                                                                                     \
+        GLenum errCode;                                                                   \
+        if ((errCode = glGetError()) != GL_NO_ERROR)                                      \
+            printf("Error (%d): in file %s at line %d !\n", errCode, __FILE__, __LINE__); \
+    }
+
 // SCREEN SIZE
 int SCREEN_WIDTH = 800;
 int SCREEN_HEIGHT = 600;
@@ -93,15 +100,17 @@ void DisplayScene()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    UpdateOrbitCamera();
-
     // render shadowmap
     DirectionalLightCamera();
+
+    __CHECK_FOR_ERRORS
+
     if (showShadows)
     {
         RenderShadowMap();
-        glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     }
+
+    UpdateOrbitCamera();
 
     glownyProgram.Use();
     glownyProgram.SetInt("showShadows", showShadows ? 1 : 0);

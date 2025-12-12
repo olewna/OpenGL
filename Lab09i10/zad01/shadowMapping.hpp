@@ -44,7 +44,7 @@ void InitShadowMap()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float borderColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
+    float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
     // tworzenie obiektu ramki bufora
@@ -83,6 +83,12 @@ void RenderShadowMap()
 
     shadowMapProgram.UnUse();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+    int width, height;
+    glfwGetFramebufferSize(glfwGetCurrentContext(), &width, &height);
+    glViewport(0, 0, width, height);
+    matProj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, 0.1f, 50.0f);
 }
 
 void RenderShadowMapOnScreen()

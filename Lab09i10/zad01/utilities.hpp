@@ -50,17 +50,11 @@ glm::vec3 ExtractCameraPos(const glm::mat4 &a_modelView)
 // funkcja zwrotna do obslugi zmiany rozmiaru framebuffera
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
-	windowWidth = width;
-	windowHeight = height;
-
 	// Aktualizacja macierzy rzutowania
-	if (windowHeight != 0)
-		matProj = glm::perspective(glm::radians(80.0f), (float)windowWidth / (float)windowHeight, 0.1f, 50.0f);
+	if (height != 0)
+		matProj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, 0.1f, 50.0f);
 
-	// Viewport
-	int display_w, display_h;
-	glfwGetFramebufferSize(window, &display_w, &display_h);
-	glViewport(0, 0, display_w, display_h);
+	glViewport(0, 0, width, height);
 }
 
 // --------------------------------------------------------------
