@@ -27,6 +27,9 @@ bool showPostprocessing = false; // kontrola postprocessingu
 
 bool showShadows = true;
 
+float minBiasShadow = 0.001f;
+float maxBiasShadow = 0.005f;
+
 // Naglowki funkcji
 void ImGui_Init(GLFWwindow *window);
 void ImGui_Display();
@@ -150,6 +153,10 @@ void ImGui_Display()
 
         // POKAŻ cienie directional
         ImGui::Checkbox("Show directional shadows", &showShadows);
+
+        // SHADOW BIAS
+        ImGui::DragFloat("MinBias", &minBiasShadow, 0.001f, 0.001f, 0.1f);
+        ImGui::DragFloat("MaxBias", &maxBiasShadow, 0.001f, 0.001f, 0.1f);
 
         ImGui::Text("Time: %.1f ", Time);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);

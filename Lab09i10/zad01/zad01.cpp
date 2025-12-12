@@ -93,31 +93,33 @@ void Initialize()
 // =======================================================
 void DisplayScene()
 {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     Time += 0.01;
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // render shadowmap
+    // KAMERA GŁÓWNA I KAMERA DLA SHADOW MAPY
+    UpdateOrbitCamera();
     DirectionalLightCamera();
 
     __CHECK_FOR_ERRORS
 
+    // render shadowmap
     if (showShadows)
     {
         RenderShadowMap();
     }
 
-    UpdateOrbitCamera();
-
     glownyProgram.Use();
     glownyProgram.SetInt("showShadows", showShadows ? 1 : 0);
-
     glownyProgram.SetCameraUniform();
-
     glownyProgram.SetLightingUniforms(); // właczanie wylaczanie swiatla 1
+    glownyProgram.SetFloat("minBiasShadow", minBiasShadow);
+    glownyProgram.SetFloat("maxBiasShadow", maxBiasShadow);
+
+    // ANIMACJA PIERWSZEGO ŚWIATŁA PUNKTOWEGO
 
     if (animateLight)
     {
@@ -130,8 +132,9 @@ void DisplayScene()
         lights[0].Position.y = 6.0f;
     }
 
-    glownyProgram.SetInt("lightMode", lightMode);
+    // WIELE ŚWIATEŁ PUNKTOWYCH
 
+    glownyProgram.SetInt("lightMode", lightMode);
     glownyProgram.SetInt("activeLights", activeLights);
 
     for (int i = 0; i < activeLights; i++)
@@ -147,18 +150,11 @@ void DisplayScene()
     {
         RenderShadowMapOnScreen();
     }
-    // else
-    // {
-    //     // odłączanie teksturę aby shader nie korzystał z shadow mapy
-    //     glActiveTexture(GL_TEXTURE2);
-    //     glBindTexture(GL_TEXTURE_2D, 0);
-    // }
 
+    // OBIEKTY NA SCENIE
     time += deltaTime;
-
     float angleY = time;
     float angleX = 45.0f * time;
-
     glm::vec3 initialPosition(2.0f, 6.0f, 0.0f);
     glm::vec3 newPosition;
     newPosition.x = initialPosition.x * cos(angleY) - initialPosition.z * sin(angleY);
@@ -182,6 +178,8 @@ void DisplayScene()
     glownyProgram.sendMaterialParameters(myMaterialBlysk);
     monkey.Draw(glownyProgram);
 
+    // SFERY W MIEJSCACH ŚWIATEŁ PUNKTOWYCH
+
     if (lightMode == 0)
     {
         float sphereScale = 0.1f;
@@ -202,10 +200,8 @@ void DisplayScene()
 
     glownyProgram.UnUse();
 
-    // render minimapy do FBO
+    // render minimapy do FBO i wyświetlenie minimapy na ekranie
     RenderMiniMap();
-
-    // wyświetlenie minimapy na ekranie
     DisplayMiniMapOverlay();
 
     // render postprocessing

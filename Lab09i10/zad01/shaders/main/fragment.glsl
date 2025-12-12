@@ -20,6 +20,8 @@ uniform int uDrawLightSphere;
 uniform int lightMode;
 
 uniform int showShadows;
+uniform float maxBiasShadow;
+uniform float minBiasShadow;
 
 // Struktura parametrow swiatla
 struct LightParam{
@@ -128,7 +130,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 
     float closestDepth = texture(texture_shadowMap, projCoords.xy).r;
     float currentDepth = projCoords.z;
-    float bias = max(0.004*(1.0-dot(inNormal,normalize(lights[0].Direction))), 0.001);
+    float bias = max(maxBiasShadow*(1.0-dot(inNormal,normalize(lights[0].Direction))), minBiasShadow);
 
     float shadow = (currentDepth - bias > closestDepth) ? 1.0 : 0.0;
 
