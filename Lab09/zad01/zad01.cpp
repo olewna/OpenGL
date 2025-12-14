@@ -227,7 +227,7 @@ int main()
     // IMGUI
     float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
 
-    GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "lab09i10zad01", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "lab09zad01", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "okno error xd!" << std::endl;
