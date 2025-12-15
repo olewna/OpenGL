@@ -5,13 +5,13 @@
 in vec3 inPosition;
 in vec2 TexCoord;
 in vec3 inNormal;
+in vec4 fragPosLight;
 
 out vec4 FragColor;
 
 uniform sampler2D tex0; // tekstury obiektow na scene
 uniform sampler2D texture_shadowMap; // mapa cieni
-
-in vec4 fragPosLight;
+uniform samplerCube tex_shadowCubeMap; // mapa cieni dla point light
 
 uniform vec3 cameraPos;
 uniform int shadingModel;
@@ -22,6 +22,9 @@ uniform int lightMode;
 uniform int showShadows;
 uniform float maxBiasShadow;
 uniform float minBiasShadow;
+
+uniform float farPlane;
+uniform int isShadowPointMapping;
 
 // Struktura parametrow swiatla
 struct LightParam{
@@ -49,8 +52,7 @@ uniform int activeLights;
 uniform LightParam lights[MAX_LIGHTS];
 uniform int lightIndexToDraw;
 
-vec3 calculatePointLight(MaterialParam myMaterial, LightParam myLight)
-{
+vec3 calculatePointLight(MaterialParam myMaterial, LightParam myLight){
 	// Skladowa tlumienia
 	float LV = length( myLight.Position - inPosition.xyz );
 	float Latt = 1.0/( myLight.Attenuation.x + myLight.Attenuation.y * LV + myLight.Attenuation.z * LV * LV );
@@ -84,8 +86,7 @@ vec3 calculatePointLight(MaterialParam myMaterial, LightParam myLight)
 	return lightCoef;
 }
 
-vec3 calculateDirectionalLight(MaterialParam myMaterial, LightParam myLight)
-{
+vec3 calculateDirectionalLight(MaterialParam myMaterial, LightParam myLight){
     vec3 L = normalize(-myLight.Direction);   // kierunek padania
     vec3 N = normalize(inNormal);
     vec3 E = normalize(cameraPos - inPosition.xyz);
@@ -117,8 +118,7 @@ vec3 calculateDirectionalLight(MaterialParam myMaterial, LightParam myLight)
 }
 
 // Shadow calculation
-float ShadowCalculation(vec4 fragPosLightSpace)
-{
+float calcDirectionalShadow(vec4 fragPosLightSpace){
     if (showShadows == 0) {
         return 0.0;
     }
@@ -140,6 +140,34 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     return shadow;
 }
 
+float calcPointShadow(vec3 lightPosition, vec3 fragPos, float farPlane){
+    if (isShadowPointMapping == 0) {
+        return 0.0;
+    } 
+
+	vec3 fragToLight = fragPos - lightPosition;
+
+	float currentDepth = length(fragToLight);
+
+    vec3 sampleDir = normalize(fragToLight);
+
+	float closestDepth = texture(tex_shadowCubeMap, sampleDir).r;
+    closestDepth *= farPlane;
+
+    // float bias = 0.05;
+    // return (currentDepth - bias > closestDepth) ? 1.0 : 0.0;
+
+    vec3 lightDirection = normalize(fragPos - lightPosition);
+
+	float bias = 0.01;
+	float shadow = 0.0;
+
+	bias = max(maxBiasShadow * (1.0 - dot(inNormal, lightDirection)), minBiasShadow);
+
+	shadow = currentDepth -  bias > closestDepth ? 1.0 : 0.0;
+	return shadow;
+}
+
 void main()
 {
     vec3 baseColor = texture(tex0, TexCoord).rgb;
@@ -154,28 +182,28 @@ void main()
         return;
     }
 
-    vec3 lightColor = vec3(0);
+    vec3 finalColor = vec3(0.0);
 
-	if (lightMode == 0) {
-        for (int i = 0; i < activeLights; i++) {
-		    lightColor += calculatePointLight(myMaterial, lights[i]);
-        }
-	} else if (lightMode == 1) {
-        LightParam myLight = lights[0];
-		lightColor = calculateDirectionalLight(myMaterial, myLight);
-	}
-
-    vec3 result;
-
-    // cień
+    // =======================
+    // DIRECTIONAL LIGHT
+    // =======================
     if (lightMode == 1) {
-        vec4 fragPosLightSpace = fragPosLight;
-        float shadow = ShadowCalculation(fragPosLightSpace);
-
-        result = (lights[0].Ambient + (1.0 - shadow) * lightColor) * baseColor;
-    } else {
-        result = lightColor * baseColor;
+        vec3 lightCol = calculateDirectionalLight(myMaterial, lights[0]);
+        float shadow = calcDirectionalShadow(fragPosLight);
+        finalColor = (1.0 - shadow) * lightCol * baseColor;
     }
 
-    FragColor = vec4(result, 1.0);
+    // =======================
+    // POINT LIGHTS
+    // =======================
+    else {
+        for (int i = 0; i < activeLights; i++) {
+            vec3 lightCol = calculatePointLight(myMaterial, lights[i]);
+            float shadow = calcPointShadow(lights[i].Position, inPosition, farPlane);
+            // shadow = 0.0; // DEBUG
+            finalColor += (1.0 - shadow) * lightCol * baseColor;
+        }
+    }
+
+    FragColor = vec4(finalColor, 1.0);
 }

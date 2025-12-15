@@ -18,17 +18,19 @@ bool lightingEnabled = true;
 bool animateLight = false;
 float lightAngle = 0.0f;
 int shadingModel = 0;
-int lightMode = 1; // 0 - punktowe 1 kierunkunowe
+int lightMode = 0; // 0 - punktowe 1 kierunkunowe
 
 bool showMiniMap = false; // kontrola minimapy
 
 int currentEffect = 0;           // postprocessing efekt
 bool showPostprocessing = false; // kontrola postprocessingu
 
-bool showShadows = true;
+bool showShadows = false;
 
 float minBiasShadow = 0.001f;
 float maxBiasShadow = 0.005f;
+
+bool isShadowPointMapping = false;
 
 // Naglowki funkcji
 void ImGui_Init(GLFWwindow *window);
@@ -153,6 +155,9 @@ void ImGui_Display()
 
         // POKAŻ cienie directional
         ImGui::Checkbox("Show directional shadows", &showShadows);
+
+        // POKAŻ cienie directional
+        ImGui::Checkbox("Show point light shadows", &isShadowPointMapping);
 
         // SHADOW BIAS
         ImGui::DragFloat("MinBias", &minBiasShadow, 0.001f, 0.001f, 0.1f);

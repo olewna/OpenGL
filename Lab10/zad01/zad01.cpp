@@ -11,11 +11,39 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#define __CHECK_FOR_ERRORS                                                                \
-    {                                                                                     \
-        GLenum errCode;                                                                   \
-        if ((errCode = glGetError()) != GL_NO_ERROR)                                      \
-            printf("Error (%d): in file %s at line %d !\n", errCode, __FILE__, __LINE__); \
+inline const char *GLErrorToString(GLenum err)
+{
+    switch (err)
+    {
+    case GL_NO_ERROR:
+        return "GL_NO_ERROR";
+    case GL_INVALID_ENUM:
+        return "GL_INVALID_ENUM";
+    case GL_INVALID_VALUE:
+        return "GL_INVALID_VALUE";
+    case GL_INVALID_OPERATION:
+        return "GL_INVALID_OPERATION";
+    case GL_STACK_OVERFLOW:
+        return "GL_STACK_OVERFLOW";
+    case GL_STACK_UNDERFLOW:
+        return "GL_STACK_UNDERFLOW";
+    case GL_OUT_OF_MEMORY:
+        return "GL_OUT_OF_MEMORY";
+    case GL_INVALID_FRAMEBUFFER_OPERATION:
+        return "GL_INVALID_FRAMEBUFFER_OPERATION";
+    default:
+        return "UNKNOWN_ERROR";
+    }
+}
+
+#define __CHECK_FOR_ERRORS                                                 \
+    {                                                                      \
+        GLenum errCode;                                                    \
+        while ((errCode = glGetError()) != GL_NO_ERROR)                    \
+        {                                                                  \
+            printf("OpenGL Error %d (%s): in file %s at line %d\n",        \
+                   errCode, GLErrorToString(errCode), __FILE__, __LINE__); \
+        }                                                                  \
     }
 
 // SCREEN SIZE
@@ -53,6 +81,12 @@ CMesh lightSphere;
 #include "postprocessing.hpp"
 #include "shadowMapping.hpp"
 
+#include "CShadowPointLight.hpp"
+
+CShadowPointLight ShadowPointLight;
+
+#include "shadowPointLight.hpp"
+
 // =======================================================
 // INIT
 // =======================================================
@@ -86,6 +120,12 @@ void Initialize()
 
     // SHADOW MAP
     InitShadowMap();
+
+    // for (int i = 0; i < activeLights; i++)
+    // {
+    //     ShadowPointLight.Init(lights[i].Position);
+    // }
+    ShadowPointLight.Init(lights[0].Position);
 }
 
 // =======================================================
@@ -104,16 +144,27 @@ void DisplayScene()
     UpdateOrbitCamera();
     DirectionalLightCamera();
 
-    __CHECK_FOR_ERRORS
-
     // render shadowmap
     if (showShadows)
     {
         RenderShadowMap();
     }
 
+    // rendering pozaekranowy shadowmapboxa
+    if (isShadowPointMapping)
+    {
+        ShadowPointLight.lightPosition = lights[0].Position;
+        ShadowPointLight.UpdateViewMat();
+
+        RenderScene_to_ShadowCubeMap();
+        __CHECK_FOR_ERRORS
+    }
+
     glownyProgram.Use();
+    glownyProgram.SetInt("tex_shadowCubeMap", 1);
+    __CHECK_FOR_ERRORS
     glownyProgram.SetInt("showShadows", showShadows ? 1 : 0);
+    glownyProgram.SetInt("isShadowPointMapping", isShadowPointMapping ? 1 : 0); // 1 jak maja byc cienie, 0 jak nie
     glownyProgram.SetCameraUniform();
     glownyProgram.SetLightingUniforms(); // właczanie wylaczanie swiatla 1
     glownyProgram.SetFloat("minBiasShadow", minBiasShadow);
@@ -149,6 +200,11 @@ void DisplayScene()
     if (showShadows)
     {
         RenderShadowMapOnScreen();
+    }
+
+    if (isShadowPointMapping)
+    {
+        RenderScene_on_Screen();
     }
 
     // OBIEKTY NA SCENIE
@@ -271,6 +327,7 @@ int main()
 
     // IMGUI
     ImGui_Clean();
+    ShadowPointLight.Clean();
 
     glfwDestroyWindow(window);
     glfwTerminate();

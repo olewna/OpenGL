@@ -52,6 +52,7 @@ public:
     {
         glUniformMatrix4fv(glGetUniformLocation(idProgram, name), 1, GL_FALSE, glm::value_ptr(matrix));
     }
+
     void SetInt(const char *name, int value)
     {
         glUniform1i(glGetUniformLocation(idProgram, name), value);
@@ -60,6 +61,11 @@ public:
     void SetFloat(const char *name, float value)
     {
         glUniform1f(glGetUniformLocation(idProgram, name), value);
+    }
+
+    void SetFloat3(const char *name, const glm::vec3 &value)
+    {
+        glUniform3fv(glGetUniformLocation(idProgram, name), 1, glm::value_ptr(value));
     }
 
     void SetShadingProgram()
