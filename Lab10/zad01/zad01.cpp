@@ -83,7 +83,7 @@ CMesh lightSphere;
 
 #include "CShadowPointLight.hpp"
 
-CShadowPointLight ShadowPointLight;
+CShadowPointLight shadowPointLights[MAX_LIGHTS];
 
 #include "shadowPointLight.hpp"
 
@@ -121,11 +121,12 @@ void Initialize()
     // SHADOW MAP
     InitShadowMap();
 
-    // for (int i = 0; i < activeLights; i++)
-    // {
-    //     ShadowPointLight.Init(lights[i].Position);
-    // }
-    ShadowPointLight.Init(lights[0].Position);
+    for (int i = 0; i < MAX_LIGHTS; i++)
+    {
+        shadowPointLights[i].Init(lights[i].Position);
+    }
+
+    // ShadowPointLight.Init(lights[0].Position);
 }
 
 // =======================================================
@@ -153,15 +154,28 @@ void DisplayScene()
     // rendering pozaekranowy shadowmapboxa
     if (isShadowPointMapping)
     {
-        ShadowPointLight.lightPosition = lights[0].Position;
-        ShadowPointLight.UpdateViewMat();
+        for (int i = 0; i < activeLights; i++)
+        {
+            shadowPointLights[i].lightPosition = lights[i].Position;
+            shadowPointLights[i].UpdateViewMat();
 
-        RenderScene_to_ShadowCubeMap();
+            RenderScene_to_ShadowCubeMap(shadowPointLights[i]);
+        }
+
         __CHECK_FOR_ERRORS
     }
 
     glownyProgram.Use();
-    glownyProgram.SetInt("tex_shadowCubeMap", 1);
+    // glownyProgram.SetInt("tex_shadowCubeMap", 1);
+
+    int baseSlot = 1;
+
+    for (int i = 0; i < MAX_LIGHTS; i++)
+    {
+        std::string name = "tex_shadowCubeMap[" + std::to_string(i) + "]";
+        glownyProgram.SetInt(name.c_str(), baseSlot + i);
+    }
+
     __CHECK_FOR_ERRORS
     glownyProgram.SetInt("showShadows", showShadows ? 1 : 0);
     glownyProgram.SetInt("isShadowPointMapping", isShadowPointMapping ? 1 : 0); // 1 jak maja byc cienie, 0 jak nie
@@ -327,7 +341,10 @@ int main()
 
     // IMGUI
     ImGui_Clean();
-    ShadowPointLight.Clean();
+    for (int i = 0; i < activeLights; i++)
+    {
+        shadowPointLights[i].Clean();
+    }
 
     glfwDestroyWindow(window);
     glfwTerminate();

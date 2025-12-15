@@ -15,7 +15,7 @@
 #include "CProgram.hpp"
 #include "CShadowPointLight.hpp"
 
-void RenderScene_to_ShadowCubeMap()
+void RenderScene_to_ShadowCubeMap(CShadowPointLight &spl)
 {
     // -------------------------------------------------------
     // NOWE: Generowanie szesciennej mapy cieni
@@ -32,7 +32,7 @@ void RenderScene_to_ShadowCubeMap()
     for (int face = 0; face < 6; face++)
     {
         __CHECK_FOR_ERRORS
-        ShadowPointLight.GenBegin(face);
+        spl.GenBegin(face);
 
         // Renderujemy obiekt przy uzyciu aktualnego programu
         // Koniecznie wysylamy macierz modelu, aby potok wyrenderowal obiekt
@@ -53,7 +53,7 @@ void RenderScene_to_ShadowCubeMap()
     }
 
     // Zakonczenie procesu generowania cieni
-    ShadowPointLight.GenEnd();
+    spl.GenEnd();
 
     int width, height;
     glfwGetFramebufferSize(glfwGetCurrentContext(), &width, &height);
@@ -67,7 +67,12 @@ void RenderScene_on_Screen()
     // glViewport(0, 0, windowWidth, windowHeight);
     // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glm::vec3 cameraPos = ExtractCameraPos(matView);
-    ShadowPointLight.SendUniforms(glownyProgram, 1, cameraPos);
+    for (int i = 0; i < activeLights; i++)
+    {
+        shadowPointLights[i].SendUniforms(glownyProgram, 1 + i, cameraPos, i);
+    }
+
+    // ShadowPointLight.SendUniforms(glownyProgram, 1, cameraPos);
     // ShadowPointLightProgram.UnUse();
 
     // WYLACZAMY program

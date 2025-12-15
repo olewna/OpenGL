@@ -118,6 +118,7 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, idFrameBuffer[face]);
         glViewport(0, 0, DepthMap_Width, DepthMap_Height);
         glClear(GL_DEPTH_BUFFER_BIT);
+        __CHECK_FOR_ERRORS
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, idTextureCube, 0);
         __CHECK_FOR_ERRORS
@@ -143,7 +144,7 @@ public:
     // Etap 3: Podczas finalnego renderingu na ekran
     // Wysylanie do programu _prog wszystkich potrzebnych uniformow
     // Ustawianie tekstury mapy cieni na slot _texSlot
-    void SendUniforms(CProgram &_prog, GLuint _texSlot, glm::vec3 _camPos)
+    void SendUniforms(CProgram &_prog, GLuint _texSlot, glm::vec3 _camPos, int id)
     {
 
         // Shadow map textura na slot _texSlot
@@ -151,10 +152,12 @@ public:
         glActiveTexture(GL_TEXTURE0 + _texSlot);
         glBindTexture(GL_TEXTURE_CUBE_MAP, idTextureCube);
         __CHECK_FOR_ERRORS
-        _prog.SetInt("tex_shadowCubeMap", _texSlot);
-        __CHECK_FOR_ERRORS
 
-        _prog.SetFloat("farPlane", frustumFar);
+        std::string samplerName = "tex_shadowCubeMap[" + std::to_string(id) + "]";
+        _prog.SetInt(samplerName.c_str(), _texSlot);
+
+        std::string farPlaneName = "farPlane[" + std::to_string(id) + "]";
+        _prog.SetFloat(farPlaneName.c_str(), frustumFar);
 
         _prog.SetFloat3("cameraPos", _camPos);
         __CHECK_FOR_ERRORS

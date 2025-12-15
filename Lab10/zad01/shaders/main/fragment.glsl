@@ -11,7 +11,7 @@ out vec4 FragColor;
 
 uniform sampler2D tex0; // tekstury obiektow na scene
 uniform sampler2D texture_shadowMap; // mapa cieni
-uniform samplerCube tex_shadowCubeMap; // mapa cieni dla point light
+uniform samplerCube tex_shadowCubeMap[MAX_LIGHTS]; // mapa cieni dla point light
 
 uniform vec3 cameraPos;
 uniform int shadingModel;
@@ -23,7 +23,7 @@ uniform int showShadows;
 uniform float maxBiasShadow;
 uniform float minBiasShadow;
 
-uniform float farPlane;
+uniform float farPlane[MAX_LIGHTS];
 uniform int isShadowPointMapping;
 
 // Struktura parametrow swiatla
@@ -140,7 +140,7 @@ float calcDirectionalShadow(vec4 fragPosLightSpace){
     return shadow;
 }
 
-float calcPointShadow(vec3 lightPosition, vec3 fragPos, float farPlane){
+float calcPointShadow(vec3 lightPosition, vec3 fragPos, float farPlane, int lightId){
     if (isShadowPointMapping == 0) {
         return 0.0;
     } 
@@ -151,7 +151,7 @@ float calcPointShadow(vec3 lightPosition, vec3 fragPos, float farPlane){
 
     vec3 sampleDir = normalize(fragToLight);
 
-	float closestDepth = texture(tex_shadowCubeMap, sampleDir).r;
+	float closestDepth = texture(tex_shadowCubeMap[lightId], sampleDir).r;
     closestDepth *= farPlane;
 
     // float bias = 0.05;
@@ -199,7 +199,7 @@ void main()
     else {
         for (int i = 0; i < activeLights; i++) {
             vec3 lightCol = calculatePointLight(myMaterial, lights[i]);
-            float shadow = calcPointShadow(lights[i].Position, inPosition, farPlane);
+            float shadow = calcPointShadow(lights[i].Position, inPosition, farPlane[i], i);
             // shadow = 0.0; // DEBUG
             finalColor += (1.0 - shadow) * lightCol * baseColor;
         }
