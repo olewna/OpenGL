@@ -17,7 +17,7 @@
 class CMesh
 {
 public:
-    CMesh() : idVAO(0), idVBO_coords(0), idVBO_uvs(0), idVBO_normals(0), idTexture(0), vertexCount(0), matModel(1.0f) {}
+    CMesh() : idVAO(0), idVBO_coords(0), idVBO_uvs(0), idVBO_normals(0), idTexture(0), vertexCount(0), matModel(1.0f), position(0.0f, 0.0f, 0.0f) {}
     ~CMesh() { Clean(); }
 
     bool CreateFromOBJ(const char *filename)
@@ -141,7 +141,13 @@ public:
 
     void SetPosition(const glm::vec3 &pos)
     {
+        position = pos;
         matModel = glm::translate(glm::mat4(1.0f), pos);
+    }
+
+    glm::vec3 GetPosition() const
+    {
+        return position;
     }
 
     void SetRotation(const glm::vec3 &angles)
@@ -158,6 +164,7 @@ private:
     GLuint idTexture;
     size_t vertexCount;
     glm::mat4 matModel;
+    glm::vec3 position;
 };
 
 #endif

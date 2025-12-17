@@ -26,6 +26,10 @@ uniform float minBiasShadow;
 uniform float farPlane[MAX_LIGHTS];
 uniform int isShadowPointMapping;
 
+uniform samplerCube tex_environment;
+uniform int uUseEnvMap;
+uniform float envStrength;
+
 // Struktura parametrow swiatla
 struct LightParam{
 	vec3 Ambient;
@@ -203,6 +207,16 @@ void main()
             // shadow = 0.0; // DEBUG
             finalColor += (1.0 - shadow) * lightCol * baseColor;
         }
+    }
+
+    if (uUseEnvMap == 1) {
+        vec3 I = normalize(inPosition - cameraPos);
+        vec3 N = normalize(inNormal);
+
+        vec3 R = reflect(I, N);
+        vec3 envColor = texture(tex_environment, R).rgb;
+
+        finalColor = mix(finalColor, envColor, envStrength);
     }
 
     FragColor = vec4(finalColor, 1.0);

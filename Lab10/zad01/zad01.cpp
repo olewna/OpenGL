@@ -87,6 +87,7 @@ CShadowPointLight shadowPointLights[MAX_LIGHTS];
 
 #include "shadowPointLight.hpp"
 #include "skybox.hpp"
+#include "environmental_mapping.hpp"
 
 // =======================================================
 // INIT
@@ -107,7 +108,7 @@ void Initialize()
     tower.SetPosition(glm::vec3(5.0, -1.3, 0.0));
     tower.LoadTexture("assets/wood.jpg");
 
-    monkey.CreateFromOBJ("objs/monkey.obj");
+    monkey.CreateFromOBJ("objs/monke.obj");
     monkey.LoadTexture("assets/brick.jpg");
 
     lightSphere.CreateFromOBJ("objs/sphere.obj");
@@ -123,6 +124,9 @@ void Initialize()
 
     // SHADOW MAP
     InitShadowMap();
+
+    // environmental mapping
+    InitEnvironmentMap();
 
     for (int i = 0; i < MAX_LIGHTS; i++)
     {
@@ -166,11 +170,17 @@ void DisplayScene()
         __CHECK_FOR_ERRORS
     }
 
+    if (useEnvMapping)
+    {
+        RenderEnvironmentMap(monkey.GetPosition());
+    }
+
     glownyProgram.Use();
-    // glownyProgram.SetInt("tex_shadowCubeMap", 1);
 
+    glownyProgram.SetInt("tex_environment", 10);
+
+    // ustawianie shadowcubemapy na defaultową jakas
     int baseSlot = 1;
-
     for (int i = 0; i < MAX_LIGHTS; i++)
     {
         std::string name = "tex_shadowCubeMap[" + std::to_string(i) + "]";
@@ -223,20 +233,32 @@ void DisplayScene()
     }
 
     // OBIEKTY NA SCENIE
-    time += deltaTime;
-    float angleY = time;
-    float angleX = 45.0f * time;
-    glm::vec3 initialPosition(2.0f, 6.0f, 0.0f);
-    glm::vec3 newPosition;
-    newPosition.x = initialPosition.x * cos(angleY) - initialPosition.z * sin(angleY);
-    newPosition.z = initialPosition.x * sin(angleY) + initialPosition.z * cos(angleY);
-    newPosition.y = initialPosition.y;
+    if (animationMonkey)
+    {
+        time += deltaTime;
+        float angleY = time;
+        float angleX = 45.0f * time;
+        glm::vec3 initialPosition(2.0f, 6.0f, 0.0f);
+        glm::vec3 newPosition;
+        newPosition.x = initialPosition.x * cos(angleY) - initialPosition.z * sin(angleY);
+        newPosition.z = initialPosition.x * sin(angleY) + initialPosition.z * cos(angleY);
+        newPosition.y = initialPosition.y;
 
-    monkey.SetPosition(newPosition);
-    monkey.SetRotation(glm::vec3(angleX, angleY, 0.0f));
+        monkey.SetPosition(newPosition);
+        monkey.SetRotation(glm::vec3(angleX, angleY, 0.0f));
+    }
+
+    if (useEnvMapping)
+    {
+        BindSkyboxTexture();
+    }
 
     glownyProgram.SetMat4("matProj", matProj);
     glownyProgram.SetMat4("matView", matView);
+
+    // environmental mapping unifroms
+    glownyProgram.SetInt("uUseEnvMap", useEnvMapping ? 1 : 0);
+    glownyProgram.SetFloat("envStrength", 0.0f);
 
     glownyProgram.SetMat4("matModel", plane.GetModelMatrix());
     glownyProgram.sendMaterialParameters(myMaterialMatowy);
@@ -245,9 +267,17 @@ void DisplayScene()
     glownyProgram.SetMat4("matModel", tower.GetModelMatrix());
     tower.Draw(glownyProgram);
 
+    // environmental mapping unifroms
+    glownyProgram.SetInt("uUseEnvMap", useEnvMapping ? 1 : 0);
+    glownyProgram.SetFloat("envStrength", 0.8f);
+
     glownyProgram.SetMat4("matModel", monkey.GetModelMatrix());
     glownyProgram.sendMaterialParameters(myMaterialBlysk);
     monkey.Draw(glownyProgram);
+
+    // environmental mapping unifroms
+    glownyProgram.SetInt("uUseEnvMap", useEnvMapping ? 1 : 0);
+    glownyProgram.SetFloat("envStrength", 0.0f);
 
     // SFERY W MIEJSCACH ŚWIATEŁ PUNKTOWYCH
 
@@ -272,7 +302,7 @@ void DisplayScene()
     glownyProgram.UnUse();
 
     // skybox
-    DrawSkyBox();
+    DrawSkyBox(matView, matProj);
 
     // render postprocessing
     RenderSceneToFBO();

@@ -100,7 +100,7 @@ void RenderSceneToFBO()
 
     // ================= SKYBOX DO FBO =================
     glDepthFunc(GL_LEQUAL);
-    DrawSkyBox();
+    DrawSkyBox(matView, matProj);
     glDepthFunc(GL_LESS);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -66,7 +66,6 @@ public:
         // 2. Textura do depthMapy
         glGenTextures(1, &idTextureCube);
         glBindTexture(GL_TEXTURE_CUBE_MAP, idTextureCube);
-        assert(idTextureCube != 0);
 
         for (int i = 0; i < 6; ++i)
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, DepthMap_Width, DepthMap_Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);

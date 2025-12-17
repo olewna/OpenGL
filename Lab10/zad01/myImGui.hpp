@@ -8,11 +8,16 @@
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 // -----------------------------------
 // ImGui ImGui ImGui ImGui ImGui ImGui
 // -----------------------------------
 
 #include "LightParam.hpp"
+#include "utilities.hpp"
 
 bool lightingEnabled = true;
 bool animateLight = false;
@@ -31,6 +36,9 @@ float minBiasShadow = 0.001f;
 float maxBiasShadow = 0.005f;
 
 bool isShadowPointMapping = false;
+
+bool animationMonkey = true;
+bool useEnvMapping = false;
 
 // Naglowki funkcji
 void ImGui_Init(GLFWwindow *window);
@@ -100,6 +108,8 @@ void ImGui_Display()
         static float f = 0.0f;
         static int counter = 0;
 
+        glm::vec3 camPos = ExtractCameraPos(matView);
+
         // RODZAJ CIENIOWANIA
         const char *shadingItems[] = {"Phong", "Blinn-Phong"};
         ImGui::Begin("Lighting lab06&07 opengl glfw");
@@ -160,11 +170,18 @@ void ImGui_Display()
         ImGui::Checkbox("Show point light shadows", &isShadowPointMapping);
 
         // SHADOW BIAS
-        ImGui::DragFloat("MinBias", &minBiasShadow, 0.001f, 0.001f, 0.1f);
-        ImGui::DragFloat("MaxBias", &maxBiasShadow, 0.001f, 0.001f, 0.1f);
+        ImGui::DragFloat("MinBias", &minBiasShadow, 0.01f, 0.001f, 1.0f);
+        ImGui::DragFloat("MaxBias", &maxBiasShadow, 0.01f, 0.001f, 1.0f);
+
+        // monkey animation
+        ImGui::Checkbox("Monkey animation", &animationMonkey);
+
+        // env mapping
+        ImGui::Checkbox("Env mapping", &useEnvMapping);
 
         ImGui::Text("Time: %.1f ", Time);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::Text("Camera Pos: %.2f, %.2f, %.2f", camPos.x, camPos.y, camPos.z);
         ImGui::End();
     }
 

@@ -75,7 +75,7 @@ void CreateSkyBox()
 
     // Program
     SkyBoxProgram.Init();
-    SkyBoxProgram.LoadShaders("shaders/environment_mapping/vertex.glsl", "shaders/environment_mapping/fragment.glsl");
+    SkyBoxProgram.LoadShaders("shaders/skybox/vertex.glsl", "shaders/skybox/fragment.glsl");
 
     // Vertex arrays
     glGenVertexArrays(1, &SkyBox_idVAO);
@@ -135,7 +135,7 @@ void CreateSkyBox()
 // ----------------------------------
 // Renderowanie SkyBoxa
 // ----------------------------------
-void DrawSkyBox(float scale = 40.0f)
+void DrawSkyBox(const glm::mat4 &view, const glm::mat4 &proj, float scale = 40.0f)
 {
     // Specjalny potok dla SkyBoxa (uproszczony)
     // Ten program nie ma oswietlenia/cieni itp.
@@ -150,7 +150,7 @@ void DrawSkyBox(float scale = 40.0f)
     // // Dodajemy sztuczny offset w Y
     // view = glm::translate(view, glm::vec3(0.0f, -10.0f, 0.0f));
 
-    glm::mat4 matPVM = matProj * matView * glm::scale(glm::mat4(1), glm::vec3(scale, scale, scale));
+    glm::mat4 matPVM = proj * view * glm::scale(glm::mat4(1), glm::vec3(scale, scale, scale));
     SkyBoxProgram.SetMat4("matPVM", matPVM);
     // glUniformMatrix4fv(glGetUniformLocation(SkyBox_idProgram, "matPVM"), 1, GL_FALSE, glm::value_ptr(matPVM));
 
