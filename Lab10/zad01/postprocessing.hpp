@@ -12,6 +12,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "CProgram.hpp"
+#include "skybox.hpp"
 
 GLuint postFBO, postTexture, postRBO;
 GLuint quadVAO, quadVBO;
@@ -96,6 +97,11 @@ void RenderSceneToFBO()
     monkey.Draw(glownyProgram);
 
     glownyProgram.UnUse();
+
+    // ================= SKYBOX DO FBO =================
+    glDepthFunc(GL_LEQUAL);
+    DrawSkyBox();
+    glDepthFunc(GL_LESS);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     int width, height;

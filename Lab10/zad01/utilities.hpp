@@ -68,6 +68,20 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 
 // 	return matView;
 // }
+glm::mat4 UpdateOrbitCamera()
+{
+	float radYaw = glm::radians(CameraYaw);
+	float radPitch = glm::radians(CameraPitch);
+
+	glm::vec3 cameraPos;
+	cameraPos.x = CameraTarget.x + CameraDistance * cos(radPitch) * sin(radYaw);
+	cameraPos.y = CameraTarget.y + CameraDistance * sin(radPitch);
+	cameraPos.z = CameraTarget.z + CameraDistance * cos(radPitch) * cos(radYaw);
+
+	matView = glm::lookAt(cameraPos, CameraTarget, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	return matView;
+}
 
 // ---------------------------------------------------
 // funkcja zwrotna do obslugi scrolla myszy
@@ -157,32 +171,6 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 	{
 		printf("Nacisnieto klawisz %d \n", key);
 	}
-}
-
-glm::mat4 UpdateOrbitCamera()
-{
-	float radYaw = glm::radians(CameraYaw);
-	float radPitch = glm::radians(CameraPitch);
-
-	glm::vec3 cameraPos;
-	cameraPos.x = CameraTarget.x + CameraDistance * cos(radPitch) * sin(radYaw);
-	cameraPos.y = CameraTarget.y + CameraDistance * sin(radPitch);
-	cameraPos.z = CameraTarget.z + CameraDistance * cos(radPitch) * cos(radYaw);
-	// cameraPos = -10.0f * myLight1.Direction;
-
-	matView = glm::lookAt(cameraPos, CameraTarget, glm::vec3(0.0f, 1.0f, 0.0f));
-
-	// if (SCREEN_HEIGHT != 0)
-	// 	matProj = glm::perspective(glm::radians(80.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, CameraNear, CameraFar); // fovy,aspect,near,far,type
-
-	// printf("%f", cameraPos.x);
-	// printf(" ");
-	// printf("%f", cameraPos.y);
-	// printf(" ");
-	// printf("%f", cameraPos.z);
-	// printf("\n");
-
-	return matView;
 }
 
 // ---------------------------------------------------

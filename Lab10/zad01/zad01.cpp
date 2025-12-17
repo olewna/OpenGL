@@ -271,14 +271,14 @@ void DisplayScene()
 
     glownyProgram.UnUse();
 
-    // render minimapy do FBO i wyświetlenie minimapy na ekranie
+    // skybox
+    DrawSkyBox();
 
     // render postprocessing
     RenderSceneToFBO();
     RenderPostProcess();
 
-    DrawSkyBox();
-
+    // render minimapy do FBO i wyświetlenie minimapy na ekranie
     RenderMiniMap();
     DisplayMiniMapOverlay();
 }
