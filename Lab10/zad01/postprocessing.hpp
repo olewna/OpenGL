@@ -24,7 +24,7 @@ void InitPostProcess()
 
     glGenTextures(1, &postTexture);
     glBindTexture(GL_TEXTURE_2D, postTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -32,7 +32,7 @@ void InitPostProcess()
 
     glGenRenderbuffers(1, &postRBO);
     glBindRenderbuffer(GL_RENDERBUFFER, postRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, windowWidth, windowHeight);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, SCREEN_WIDTH, SCREEN_HEIGHT);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, postRBO);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -72,7 +72,7 @@ void RenderSceneToFBO()
     if (!showPostprocessing)
         return;
     glBindFramebuffer(GL_FRAMEBUFFER, postFBO);
-    glViewport(0, 0, windowWidth, windowHeight);
+    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     postprocessingProgram.Init();
@@ -101,7 +101,7 @@ void RenderSceneToFBO()
     int width, height;
     glfwGetFramebufferSize(glfwGetCurrentContext(), &width, &height);
     glViewport(0, 0, width, height);
-    matProj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, 0.1f, 50.0f);
+    matProj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, CameraNear, CameraFar);
 }
 
 void RenderPostProcess()

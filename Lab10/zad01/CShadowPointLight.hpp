@@ -34,7 +34,7 @@ public:
     int DepthMap_Height = 1024;
 
     // Bryla obcinania (frustum)
-    float frustumNear = 1.0f;
+    float frustumNear = 0.1f;
     float frustumFar = 20.0f;
     // macierz projection oraz view
     // do renderingu kazdej z szesciu scian

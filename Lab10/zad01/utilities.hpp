@@ -5,15 +5,14 @@
 #ifndef __UTILITIES_HPP
 #define __UTILITIES_HPP
 
-// Wymiary okna
-int windowWidth = 800, windowHeight = 600;
-
 // START
 
 float CameraYaw = 0.0f;		  // horizontal rotation
 float CameraPitch = 20.0f;	  // vertical rotation
 float CameraDistance = 15.0f; // distance to target
 glm::vec3 CameraTarget = glm::vec3(0.0f, 6.0f, 0.0f);
+float CameraFar = 80.0f;
+float CameraNear = 0.1f;
 
 // Zmienne do obslugi myszy
 double lastMouseX = 0.0, lastMouseY = 0.0;
@@ -52,7 +51,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
 	// Aktualizacja macierzy rzutowania
 	if (height != 0)
-		matProj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, 0.1f, 50.0f);
+		matProj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, CameraNear, CameraFar);
 
 	glViewport(0, 0, width, height);
 }
@@ -173,8 +172,8 @@ glm::mat4 UpdateOrbitCamera()
 
 	matView = glm::lookAt(cameraPos, CameraTarget, glm::vec3(0.0f, 1.0f, 0.0f));
 
-	if (windowHeight != 0)
-		matProj = glm::perspective(glm::radians(80.0f), windowWidth / (float)windowHeight, 0.1f, 50.0f);
+	// if (SCREEN_HEIGHT != 0)
+	// 	matProj = glm::perspective(glm::radians(80.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, CameraNear, CameraFar); // fovy,aspect,near,far,type
 
 	// printf("%f", cameraPos.x);
 	// printf(" ");

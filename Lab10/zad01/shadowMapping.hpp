@@ -28,7 +28,7 @@ void DirectionalLightCamera()
     glm::vec3 target = lightPos + lightDir;
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    lightProj = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 2.0f, 30.5f);
+    lightProj = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 2.0f, 50.0f);
     lightView = glm::lookAt(lightPos, target, up);
 }
 
@@ -88,7 +88,7 @@ void RenderShadowMap()
     int width, height;
     glfwGetFramebufferSize(glfwGetCurrentContext(), &width, &height);
     glViewport(0, 0, width, height);
-    matProj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, 0.1f, 50.0f);
+    matProj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, CameraNear, CameraFar);
 }
 
 void RenderShadowMapOnScreen()

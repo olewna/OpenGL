@@ -47,8 +47,8 @@ inline const char *GLErrorToString(GLenum err)
     }
 
 // SCREEN SIZE
-int SCREEN_WIDTH = 800;
-int SCREEN_HEIGHT = 600;
+float SCREEN_WIDTH = 800.0f;
+float SCREEN_HEIGHT = 600.0f;
 
 // GŁOWNA KAMERA
 glm::mat4 matProj,
@@ -86,6 +86,7 @@ CMesh lightSphere;
 CShadowPointLight shadowPointLights[MAX_LIGHTS];
 
 #include "shadowPointLight.hpp"
+#include "skybox.hpp"
 
 // =======================================================
 // INIT
@@ -112,6 +113,8 @@ void Initialize()
     lightSphere.CreateFromOBJ("objs/sphere.obj");
     UpdateOrbitCamera();
 
+    CreateSkyBox();
+
     // INICJALIZACJA MINIMAPY
     InitializeMiniMap();
 
@@ -125,8 +128,6 @@ void Initialize()
     {
         shadowPointLights[i].Init(lights[i].Position);
     }
-
-    // ShadowPointLight.Init(lights[0].Position);
 }
 
 // =======================================================
@@ -271,12 +272,15 @@ void DisplayScene()
     glownyProgram.UnUse();
 
     // render minimapy do FBO i wyświetlenie minimapy na ekranie
-    RenderMiniMap();
-    DisplayMiniMapOverlay();
 
     // render postprocessing
     RenderSceneToFBO();
     RenderPostProcess();
+
+    DrawSkyBox();
+
+    RenderMiniMap();
+    DisplayMiniMapOverlay();
 }
 
 // =======================================================
