@@ -54,10 +54,9 @@ float calcPointShadow(vec3 lightPosition, vec3 fragPos, float farPlane)
 	float closestDepth = texture(tex_shadowCubeMap, fragToLight).r * farPlane;
 
 
-	return (currentDepth > closestDepth) ? 1.0 : 0.0;
+	// return (currentDepth > closestDepth) ? 1.0 : 0.0;
 
 
-	/* ----------------------------------------------------------
 	// simple test
 	vec3 lightDirection = normalize(fragPos - lightPosition);
 
@@ -68,28 +67,26 @@ float calcPointShadow(vec3 lightPosition, vec3 fragPos, float farPlane)
 
 	shadow = currentDepth -  bias > closestDepth ? 1.0 : 0.0;
 	return shadow;
-	---------------------------------------------------------- */
 
 
-	/* ----------------------------------------------------------
+	
 	// filtering
-	int samples = 20;
-	float viewDistance = length(cameraPos - fragPos.xyz);
-	float diskRadius = (1.0 + (viewDistance / farPlane)) / 25.0;
+	// int samples = 20;
+	// float viewDistance = length(cameraPos - fragPos.xyz);
+	// float diskRadius = (1.0 + (viewDistance / farPlane)) / 25.0;
 
-	for(int i = 0; i < samples; ++i)
-	{
-		float closestDepth = texture(tex_shadowCubeMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
-		closestDepth *= farPlane;   // undo mapping [0;1]
+	// for(int i = 0; i < samples; ++i)
+	// {
+	// 	float closestDepth = texture(tex_shadowCubeMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+	// 	closestDepth *= farPlane;   // undo mapping [0;1]
 
-		if(currentDepth - bias > closestDepth)
-			shadow += 1.0;
-	}
+	// 	if(currentDepth - bias > closestDepth)
+	// 		shadow += 1.0;
+	// }
 
-	shadow /= float(samples);
+	// shadow /= float(samples);
 
-	return shadow;
-	---------------------------------------------------------- */
+	// return shadow;
 }
 
 
