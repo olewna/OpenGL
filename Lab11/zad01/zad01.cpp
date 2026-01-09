@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cstdlib>
+#include <ctime>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -57,7 +59,7 @@ glm::mat4 matProj,
 // Zmienna czas do animacji
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-float time = 0.0f;
+float myTime = 0.0f;
 float Time = 0.0;
 
 #include "objloader.hpp"
@@ -69,13 +71,20 @@ float Time = 0.0;
 #include "utilities.hpp"
 
 #include "CProgram.hpp"
+CProgram glownyProgram;
 #include "CMesh.hpp"
 
-CProgram glownyProgram;
-CMesh plane;
+#include "CGround.hpp"
+#include "CPlayer.hpp"
+
+CGround myGround;
+CPlayer myPlayer;
+
+// CMesh plane; // ZAMIAST TEGO JEST myGround!!!!!!
 CMesh monkey;
 CMesh tower;
 CMesh lightSphere;
+CMesh flower;
 
 #include "minimapa.hpp"
 #include "postprocessing.hpp"
@@ -89,6 +98,9 @@ CShadowPointLight shadowPointLights[MAX_LIGHTS];
 #include "skybox.hpp"
 #include "environmental_mapping.hpp"
 
+const int FLOWER_COUNT = 50;
+std::vector<glm::vec3> randomPos;
+
 // =======================================================
 // INIT
 // =======================================================
@@ -101,15 +113,47 @@ void Initialize()
     glownyProgram.Init();
     glownyProgram.LoadShaders("shaders/main/vertex.glsl", "shaders/main/fragment.glsl");
 
-    plane.CreateFromOBJ("objs/ground-large.obj");
-    plane.LoadTexture("assets/grass.jpg");
+    // plane.CreateFromOBJ("objs/ground-large.obj");
+    // plane.LoadTexture("assets/grass.jpg");
+    myGround.Init(
+        "objs/ground-large.obj",
+        "assets/grass.jpg");
 
     tower.CreateFromOBJ("objs/tower.obj");
-    tower.SetPosition(glm::vec3(5.0, -1.3, 0.0));
     tower.LoadTexture("assets/wood.jpg");
 
     monkey.CreateFromOBJ("objs/monke.obj");
     monkey.LoadTexture("assets/brick.jpg");
+
+    myPlayer.Init(
+        &myGround,
+        "objs/lego.obj",
+        "assets/lego.png");
+
+    flower.CreateFromOBJ("objs/flower.obj");
+    flower.LoadTexture("assets/flower32bit.png");
+
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
+
+    float minX = -20.0f;
+    float maxX = 20.0f;
+    float minZ = -20.0f;
+    float maxZ = 20.0f;
+
+    randomPos.clear();
+
+    for (int i = 0; i < FLOWER_COUNT; ++i)
+    {
+        float x = minX + (maxX - minX) * (rand() / (float)RAND_MAX);
+        float z = minZ + (maxZ - minZ) * (rand() / (float)RAND_MAX);
+
+        float y = myGround.getY(glm::vec2(x, z));
+
+        // opcjonalny offset jeśli pivot jest w środku
+        y += 0.5f;
+
+        randomPos.emplace_back(x, y, z);
+    }
 
     lightSphere.CreateFromOBJ("objs/sphere.obj");
     UpdateOrbitCamera();
@@ -235,9 +279,9 @@ void DisplayScene()
     // OBIEKTY NA SCENIE
     if (animationMonkey)
     {
-        time += deltaTime;
-        float angleY = time;
-        float angleX = 45.0f * time;
+        myTime += deltaTime;
+        float angleY = myTime;
+        float angleX = 45.0f * myTime;
         glm::vec3 initialPosition(2.0f, 6.0f, 0.0f);
         glm::vec3 newPosition;
         newPosition.x = initialPosition.x * cos(angleY) - initialPosition.z * sin(angleY);
@@ -260,10 +304,17 @@ void DisplayScene()
     glownyProgram.SetInt("uUseEnvMap", useEnvMapping ? 1 : 0);
     glownyProgram.SetFloat("envStrength", 0.0f);
 
-    glownyProgram.SetMat4("matModel", plane.GetModelMatrix());
+    // glownyProgram.SetMat4("matModel", plane.GetModelMatrix());
     glownyProgram.sendMaterialParameters(myMaterialMatowy);
-    plane.Draw(glownyProgram);
+    // plane.Draw(glownyProgram);
+    myGround.Draw(glownyProgram); // MAPA
 
+    float x = 10.0f;
+    float z = 0.0f;
+    float y = myGround.getY(glm::vec2(x, z));
+    // std::cout << "Y = " << y << std::endl;
+
+    tower.SetPosition(glm::vec3(x, y - 0.6f, z));
     glownyProgram.SetMat4("matModel", tower.GetModelMatrix());
     tower.Draw(glownyProgram);
 
@@ -274,6 +325,21 @@ void DisplayScene()
     glownyProgram.SetMat4("matModel", monkey.GetModelMatrix());
     glownyProgram.sendMaterialParameters(myMaterialBlysk);
     monkey.Draw(glownyProgram);
+
+    // player
+    //  myPlayer.SetPosition(glm::vec3(0.0, y, 0.0));
+    myPlayer.Draw(glownyProgram); // GRACZ
+
+    glownyProgram.sendMaterialParameters(myMaterialMatowy);
+
+    for (const auto &pos : randomPos)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, pos);
+
+        glownyProgram.SetMat4("matModel", model);
+        flower.Draw(glownyProgram);
+    }
 
     // environmental mapping unifroms
     glownyProgram.SetInt("uUseEnvMap", useEnvMapping ? 1 : 0);
@@ -311,6 +377,24 @@ void DisplayScene()
     // render minimapy do FBO i wyświetlenie minimapy na ekranie
     RenderMiniMap();
     DisplayMiniMapOverlay();
+}
+
+void keyboard_handler()
+{
+    float speed = 0.1; // a moze uzaleznic od FPS?
+    float rotate = 0.1f;
+
+    if (__keys[GLFW_KEY_W])
+        myPlayer.Move(speed);
+
+    if (__keys[GLFW_KEY_S])
+        myPlayer.Move(-speed);
+
+    if (__keys[GLFW_KEY_D])
+        myPlayer.Rotate(-rotate);
+
+    if (__keys[GLFW_KEY_A])
+        myPlayer.Rotate(rotate);
 }
 
 // =======================================================
@@ -364,6 +448,8 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
+        keyboard_handler();
+
         DisplayScene();
 
         // IMGUI

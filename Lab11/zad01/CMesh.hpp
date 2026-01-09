@@ -11,6 +11,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "CProgram.hpp"
+
 // =======================================================
 // 2. Oraz druga klasa do obslugi obiektow 3D
 // =======================================================
@@ -32,6 +34,7 @@ public:
             return false;
         }
 
+        verticesCPU = vertices;
         vertexCount = vertices.size();
 
         glGenVertexArrays(1, &idVAO);
@@ -159,12 +162,18 @@ public:
 
     glm::mat4 GetModelMatrix() const { return matModel; }
 
+    const std::vector<glm::vec3> &GetVertices() const
+    {
+        return verticesCPU;
+    }
+
 private:
     GLuint idVAO, idVBO_coords, idVBO_uvs, idVBO_normals;
     GLuint idTexture;
     size_t vertexCount;
     glm::mat4 matModel;
     glm::vec3 position;
+    std::vector<glm::vec3> verticesCPU;
 };
 
 #endif

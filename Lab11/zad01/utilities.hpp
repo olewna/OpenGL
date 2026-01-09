@@ -5,6 +5,7 @@
 #ifndef __UTILITIES_HPP
 #define __UTILITIES_HPP
 
+// #include "CPlayer.hpp"
 // START
 
 float CameraYaw = 0.0f;		  // horizontal rotation
@@ -156,6 +157,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 	}
 }
 
+bool __keys[1024];
 // ---------------------------------------------------
 // funkcja zwrotna do obslugi klawiatury
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -169,7 +171,12 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 
 	if (action == GLFW_PRESS)
 	{
-		printf("Nacisnieto klawisz %d \n", key);
+		__keys[key] = true;
+	}
+
+	if (action == GLFW_RELEASE)
+	{
+		__keys[key] = false;
 	}
 }
 

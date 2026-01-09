@@ -38,9 +38,10 @@ void RenderScene_to_ShadowCubeMap(CShadowPointLight &spl)
         // Koniecznie wysylamy macierz modelu, aby potok wyrenderowal obiekt
         // w odpowiednim miejscu sceny
         __CHECK_FOR_ERRORS
-        ShadowPointLightProgram.SetMat4("matModel", plane.GetModelMatrix());
+        // ShadowPointLightProgram.SetMat4("matModel", plane.GetModelMatrix());
         ShadowPointLightProgram.sendMaterialParameters(myMaterialMatowy);
-        plane.Draw(ShadowPointLightProgram);
+        // plane.Draw(ShadowPointLightProgram);
+        myGround.Draw(ShadowPointLightProgram);
         __CHECK_FOR_ERRORS
 
         ShadowPointLightProgram.SetMat4("matModel", tower.GetModelMatrix());

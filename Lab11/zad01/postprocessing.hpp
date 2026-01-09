@@ -85,9 +85,10 @@ void RenderSceneToFBO()
     glownyProgram.SetMat4("matProj", matProj);
 
     // render sceny
-    glownyProgram.SetMat4("matModel", plane.GetModelMatrix());
+    // glownyProgram.SetMat4("matModel", plane.GetModelMatrix());
     glownyProgram.sendMaterialParameters(myMaterialMatowy);
-    plane.Draw(glownyProgram);
+    // plane.Draw(glownyProgram);
+    myGround.Draw(glownyProgram);
 
     glownyProgram.SetMat4("matModel", tower.GetModelMatrix());
     tower.Draw(glownyProgram);

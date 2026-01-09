@@ -85,9 +85,10 @@ void RenderEnvironmentMap(glm::vec3 objPos)
 
         glownyProgram.SetInt("uUseEnvMap", 0);
         glownyProgram.SetFloat("envStrength", 0.0f);
-        glownyProgram.SetMat4("matModel", plane.GetModelMatrix());
+        // glownyProgram.SetMat4("matModel", plane.GetModelMatrix());
         glownyProgram.sendMaterialParameters(myMaterialMatowy);
-        plane.Draw(glownyProgram);
+        // plane.Draw(glownyProgram);
+        myGround.Draw(glownyProgram);
         __CHECK_FOR_ERRORS
 
         glownyProgram.SetMat4("matModel", tower.GetModelMatrix());

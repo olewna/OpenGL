@@ -72,8 +72,9 @@ void RenderShadowMap()
     shadowMapProgram.SetMat4("matProj", lightProj);
     shadowMapProgram.SetMat4("matView", lightView);
 
-    shadowMapProgram.SetMat4("matModel", plane.GetModelMatrix());
-    plane.Draw(shadowMapProgram);
+    // shadowMapProgram.SetMat4("matModel", plane.GetModelMatrix());
+    // plane.Draw(shadowMapProgram);
+    myGround.Draw(shadowMapProgram);
 
     shadowMapProgram.SetMat4("matModel", tower.GetModelMatrix());
     tower.Draw(shadowMapProgram);

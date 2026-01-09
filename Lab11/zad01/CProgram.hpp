@@ -12,6 +12,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "utilities.hpp"
+#include "MaterialsParam.hpp"
+#include "LightParam.hpp"
 
 // =======================================================
 // 1. Klasa do obslugi potoku

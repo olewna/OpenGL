@@ -174,7 +174,11 @@ float calcPointShadow(vec3 lightPosition, vec3 fragPos, float farPlane, int ligh
 
 void main()
 {
-    vec3 baseColor = texture(tex0, TexCoord).rgb;
+    vec4 baseColor = texture(tex0, TexCoord);
+
+    if (baseColor.a < 0.5)
+        discard;
+
 
 	if (uDrawLightSphere == 1) {
 		FragColor = vec4(lights[lightIndexToDraw].Diffuse, 1.0);   // kolor światła
@@ -182,7 +186,7 @@ void main()
 	}
 
     if (!uLightingEnabled) {
-        FragColor = vec4(baseColor, 1.0);
+        FragColor = vec4(baseColor.rgb, 1.0);
         return;
     }
 
@@ -194,7 +198,7 @@ void main()
     if (lightMode == 1) {
         vec3 lightCol = calculateDirectionalLight(myMaterial, lights[0]);
         float shadow = calcDirectionalShadow(fragPosLight);
-        finalColor = (1.0 - shadow) * lightCol * baseColor;
+        finalColor = (1.0 - shadow) * lightCol * baseColor.rgb;
     }
 
     // =======================
@@ -205,7 +209,7 @@ void main()
             vec3 lightCol = calculatePointLight(myMaterial, lights[i]);
             float shadow = calcPointShadow(lights[i].Position, inPosition, farPlane[i], i);
             // shadow = 0.0; // DEBUG
-            finalColor += (1.0 - shadow) * lightCol * baseColor;
+            finalColor += (1.0 - shadow) * lightCol * baseColor.rgb;
         }
     }
 
@@ -218,6 +222,8 @@ void main()
 
         finalColor = mix(finalColor, envColor, envStrength);
     }
+
+    
 
     FragColor = vec4(finalColor, 1.0);
 }
