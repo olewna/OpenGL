@@ -35,10 +35,18 @@ public:
 		bool isNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
 		bool isPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
 
-		if (isNeg && isPos)
-			return false;
-		else
-			return true;
+		return !(isNeg && isPos);
+	}
+
+	// sprawdzanie czy mozna wejsc po stromym zboczu
+	// 0.86 -> 30 stopni
+	// 0.7 -> 45 stopni
+	// 0.5 -> 60 stopni
+	// 0.34 -> 70 stopni
+	[[nodiscard]] bool isWalkable(float maxAngleDeg = 60.0f) const
+	{
+		float cosLimit = glm::cos(glm::radians(maxAngleDeg));
+		return glm::dot(normal, glm::vec3(0.0f, 1.0f, 0.0f)) >= cosLimit;
 	}
 
 	[[nodiscard]] inline float calcY(const glm::vec2 &point) const
@@ -57,7 +65,7 @@ private:
 		glm::vec3 v1 = p[1] - p[0];
 		glm::vec3 v2 = p[2] - p[0];
 
-		glm::vec3 normal = glm::cross(v1, v2);
+		normal = glm::normalize(glm::cross(v1, v2));
 
 		A = normal.x;
 		B = normal.y;
@@ -78,6 +86,7 @@ private:
 
 	glm::vec3 p[3];
 	float A, B, C, D;
+	glm::vec3 normal;
 };
 
 // ---------------------------------------
@@ -112,18 +121,111 @@ public:
 		mesh.Draw(program);
 	}
 
-	float getY(const glm::vec2 &point) const
+	float getHighestY(const glm::vec2 &point,
+					  float maxSlopeDeg = 60.0f) const
 	{
+		float highestY = -std::numeric_limits<float>::infinity();
+
 		for (const auto &tri : triangles)
 		{
-			if (tri.isAbove(point))
+			if (!tri.isAbove(point))
+				continue;
+
+			if (!tri.isWalkable(maxSlopeDeg))
+				continue;
+
+			float y = tri.calcY(point);
+			if (y == __ALTITUDE_ERROR)
+				continue;
+
+			if (y > highestY)
+				highestY = y;
+		}
+
+		if (highestY == -std::numeric_limits<float>::infinity())
+			return std::numeric_limits<float>::quiet_NaN();
+
+		return highestY;
+	}
+
+	float getYForPlayer(const glm::vec2 &point, float currentY,
+						float maxSlopeDeg = 60.0f,
+						float maxStep = 0.5f,
+						float ceilingTolerance = 0.1f) const
+	{
+		float bestY = -std::numeric_limits<float>::infinity();
+
+		for (const auto &tri : triangles)
+		{
+			if (!tri.isAbove(point))
+				continue;
+
+			if (!tri.isWalkable(maxSlopeDeg))
+				continue;
+
+			float y = tri.calcY(point);
+			if (y == __ALTITUDE_ERROR)
+				continue;
+
+			// ignorujemy trójkąty ponad „sufitem”
+			if (y > currentY + ceilingTolerance)
+				continue;
+
+			// wybieramy najwyższy dostępny trójkąt
+			if (y > bestY)
+				bestY = y;
+		}
+
+		// jeśli nie znaleziono trójkąta pod graczem
+		if (bestY == -std::numeric_limits<float>::infinity())
+			return std::numeric_limits<float>::quiet_NaN(); // zostawiamy gracza tam, gdzie jest
+
+		// ograniczamy skok maksymalny, ale dopiero przy interpolacji ruchu
+		if (bestY > currentY + maxStep)
+			bestY = currentY + maxStep;
+
+		return bestY;
+	}
+
+	/*
+	float getY(const glm::vec2 &point,
+			   float currentY,
+			   float maxSlopeDeg = 60.0f,
+			   float maxStep = 0.5f,
+			   float ceilingTolerance = 0.1f) const
+	{
+		float bestY = std::numeric_limits<float>::quiet_NaN();
+		float minDelta = std::numeric_limits<float>::max();
+
+		for (const auto &tri : triangles)
+		{
+			if (!tri.isAbove(point))
+				continue;
+
+			if (!tri.isWalkable(maxSlopeDeg))
+				continue;
+
+			float y = tri.calcY(point);
+			if (y == __ALTITUDE_ERROR)
+				continue;
+
+			if (y > currentY + ceilingTolerance)
+				continue;
+
+			if (y > currentY + maxStep)
+				continue;
+
+			float delta = std::abs(y - currentY);
+			if (delta < minDelta)
 			{
-				return tri.calcY(point);
+				minDelta = delta;
+				bestY = y;
 			}
 		}
 
-		return std::numeric_limits<float>::quiet_NaN();
+		return bestY;
 	}
+		*/
 
 private:
 	void BuildCollisionMesh()

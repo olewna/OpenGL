@@ -117,7 +117,8 @@ void Initialize()
     // plane.LoadTexture("assets/grass.jpg");
     myGround.Init(
         // "objs/ground-large.obj",
-        "objs/scene-plane.obj",
+        // "objs/scene-plane.obj",
+        "objs/scene-levels.obj",
         "assets/grass.jpg");
 
     tower.CreateFromOBJ("objs/tower.obj");
@@ -148,12 +149,14 @@ void Initialize()
         float x = minX + (maxX - minX) * (rand() / (float)RAND_MAX);
         float z = minZ + (maxZ - minZ) * (rand() / (float)RAND_MAX);
 
-        float y = myGround.getY(glm::vec2(x, z));
+        float y = myGround.getHighestY(glm::vec2(x, z));
 
-        // opcjonalny offset jeśli pivot jest w środku
-        y += 0.5f;
-
-        randomPos.emplace_back(x, y, z);
+        if (!std::isnan(y))
+        {
+            // opcjonalny offset jeśli pivot jest w środku
+            y += 1.0f;
+            randomPos.emplace_back(x, y, z);
+        }
     }
 
     lightSphere.CreateFromOBJ("objs/sphere.obj");
@@ -312,10 +315,13 @@ void DisplayScene()
 
     float x = 10.0f;
     float z = 0.0f;
-    float y = myGround.getY(glm::vec2(x, z));
+    float y = myGround.getHighestY(glm::vec2(x, z));
     // std::cout << "Y = " << y << std::endl;
 
-    tower.SetPosition(glm::vec3(x, y - 0.6f, z));
+    if (!std::isnan(y))
+    {
+        tower.SetPosition(glm::vec3(x, y - 0.6f, z));
+    }
     glownyProgram.SetMat4("matModel", tower.GetModelMatrix());
     tower.Draw(glownyProgram);
 

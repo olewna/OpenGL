@@ -38,7 +38,7 @@ public:
     {
         if (myGround)
         {
-            Position.y = myGround->getY(glm::vec2(Position.x, Position.z));
+            Position.y = myGround->getYForPlayer(glm::vec2(Position.x, Position.z), Position.y);
         }
 
         // aktualizacja macierzy modelu
@@ -71,7 +71,7 @@ public:
 
         if (myGround)
         {
-            float groundY = myGround->getY(glm::vec2(nextPos.x, nextPos.z));
+            float groundY = myGround->getYForPlayer(glm::vec2(nextPos.x, nextPos.z), Position.y);
 
             if (std::isnan(groundY))
                 return;
