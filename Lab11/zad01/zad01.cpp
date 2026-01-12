@@ -116,7 +116,8 @@ void Initialize()
     // plane.CreateFromOBJ("objs/ground-large.obj");
     // plane.LoadTexture("assets/grass.jpg");
     myGround.Init(
-        "objs/ground-large.obj",
+        // "objs/ground-large.obj",
+        "objs/scene-plane.obj",
         "assets/grass.jpg");
 
     tower.CreateFromOBJ("objs/tower.obj");

@@ -122,7 +122,7 @@ public:
 			}
 		}
 
-		return 0.0f;
+		return std::numeric_limits<float>::quiet_NaN();
 	}
 
 private:

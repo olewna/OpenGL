@@ -64,7 +64,22 @@ public:
 
     void Move(float speed)
     {
-        Position += Direction * speed;
+        // Position += Direction * speed;
+        // Update();
+
+        glm::vec3 nextPos = Position + Direction * speed;
+
+        if (myGround)
+        {
+            float groundY = myGround->getY(glm::vec2(nextPos.x, nextPos.z));
+
+            if (std::isnan(groundY))
+                return;
+
+            nextPos.y = groundY;
+        }
+
+        Position = nextPos;
         Update();
     }
 
