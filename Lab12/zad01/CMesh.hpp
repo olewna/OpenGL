@@ -152,6 +152,8 @@ public:
     {
         position = pos;
         matModel = glm::translate(glm::mat4(1.0f), pos);
+        if (collider)
+            collider->Position = position;
     }
 
     glm::vec3 GetPosition() const

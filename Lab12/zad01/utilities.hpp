@@ -19,6 +19,7 @@ float CameraNear = 0.1f;
 double lastMouseX = 0.0, lastMouseY = 0.0;
 bool MousePressed = false;
 int MouseButton = 0;
+void UpdateTextProjection();
 
 glm::vec3 ExtractCameraPos(const glm::mat4 &a_modelView)
 {
@@ -55,6 +56,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 		matProj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, CameraNear, CameraFar);
 
 	glViewport(0, 0, width, height);
+	UpdateTextProjection();
 }
 
 // --------------------------------------------------------------

@@ -11,6 +11,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/random.hpp>
 
+GLFWwindow *window = nullptr;
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -69,6 +71,7 @@ float Time = 0.0;
 #include "LightParam.hpp"
 #include "MaterialsParam.hpp"
 
+#include "text-ft.hpp"
 #include "utilities.hpp"
 
 #include "CProgram.hpp"
@@ -116,6 +119,10 @@ std::vector<RandomObjectInstance> treeInstances;
 #include "CCollider.hpp"
 std::vector<CSphereCollider *> sceneObjects;
 std::vector<CSphereCollider *> treeColliders;
+
+float fps = 0.0f;
+float fpsTimer = 0.0f;
+int fpsFrames = 0;
 
 // =======================================================
 // INIT
@@ -237,9 +244,20 @@ void DisplayScene()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     Time += 0.01;
+
+    // FPS-y
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
+    fpsFrames++;
+    fpsTimer += deltaTime;
+
+    if (fpsTimer >= 1.0f)
+    {
+        fps = fpsFrames / fpsTimer;
+        fpsFrames = 0;
+        fpsTimer = 0.0f;
+    }
 
     // KAMERA GŁÓWNA I KAMERA DLA SHADOW MAPY
     UpdateOrbitCamera();
@@ -370,8 +388,8 @@ void DisplayScene()
         tower.SetPosition(glm::vec3(x, y - 0.6f, z));
     }
 
-    if (tower.GetCollision())
-        tower.GetCollision()->Position = tower.GetPosition();
+    // if (tower.GetCollision())
+    //     tower.GetCollision()->Position = tower.GetPosition();
 
     glownyProgram.SetMat4("matModel", tower.GetModelMatrix());
     tower.Draw(glownyProgram);
@@ -384,6 +402,7 @@ void DisplayScene()
     glownyProgram.sendMaterialParameters(myMaterialBlysk);
     monkey.Draw(glownyProgram);
 
+    glownyProgram.sendMaterialParameters(myMaterialMatowy);
     // player
     //  myPlayer.SetPosition(glm::vec3(0.0, y, 0.0));
     myPlayer.Draw(glownyProgram); // GRACZ
@@ -438,6 +457,18 @@ void DisplayScene()
     // render minimapy do FBO i wyświetlenie minimapy na ekranie
     RenderMiniMap();
     DisplayMiniMapOverlay();
+
+    int w, h;
+    glfwGetFramebufferSize(window, &w, &h);
+
+    std::string fpsText = "FPS: " + std::to_string((int)fps);
+
+    RenderText(
+        fpsText,
+        10.0f, // X ->
+        10.0f, // Y  V
+        2.0f,
+        glm::vec3(1.0f, 0.0f, 0.0f)); // rgb kolor napisu
 }
 
 void keyboard_handler()
@@ -476,7 +507,7 @@ int main()
     // IMGUI
     float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
 
-    GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "lab10zad01", nullptr, nullptr);
+    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "lab12", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "okno error xd!" << std::endl;
@@ -506,6 +537,8 @@ int main()
     ImGui_Init(window);
 
     Initialize();
+
+    InitText("assets/arial.ttf", 24);
 
     while (!glfwWindowShouldClose(window))
     {
