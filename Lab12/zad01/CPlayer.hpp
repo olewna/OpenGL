@@ -88,15 +88,30 @@ public:
 
         CSphereCollider tempCollider(nextPos, CollisionRadius, "tempPlayer");
 
-        for (const CSphereCollider *col : sceneCols)
+        for (CSphereCollider *col : sceneCols)
         {
             if (!col)
                 continue;
 
+            if (!col->active)
+                continue;
+
             if (tempCollider.isCollision(col))
             {
-                std::cerr << "Player collides" << "\n";
-                return;
+                // if (col->debugName.find("collectible") != std::string::npos)
+                // {
+                //     score++;
+
+                //     col->active = false;
+                //     std::cout << "Score: " << score << std::endl;
+
+                //     continue;
+                // }
+                // else
+                {
+                    std::cerr << "Player collides" << "\n";
+                    return; // normalna kolizja
+                }
             }
         }
 

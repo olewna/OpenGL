@@ -40,6 +40,8 @@ bool isShadowPointMapping = false;
 bool animationMonkey = true;
 bool useEnvMapping = false;
 
+int score = 0;
+
 // Naglowki funkcji
 void ImGui_Init(GLFWwindow *window);
 void ImGui_Display();
@@ -180,6 +182,7 @@ void ImGui_Display()
         ImGui::Checkbox("Env mapping", &useEnvMapping);
 
         ImGui::Text("Time: %.1f ", Time);
+        ImGui::Text("SCORE: %.1i ", score);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
         ImGui::Text("Camera Pos: %.2f, %.2f, %.2f", camPos.x, camPos.y, camPos.z);
         ImGui::End();

@@ -56,8 +56,7 @@ float SCREEN_WIDTH = 800.0f;
 float SCREEN_HEIGHT = 600.0f;
 
 // GŁOWNA KAMERA
-glm::mat4 matProj,
-    matView;
+glm::mat4 matProj, matView;
 
 // Zmienna czas do animacji
 float deltaTime = 0.0f;
@@ -90,6 +89,7 @@ CMesh tower;
 CMesh lightSphere;
 CMesh flower;
 CMesh tree;
+CMesh collectible;
 
 #include "minimapa.hpp"
 #include "postprocessing.hpp"
@@ -103,22 +103,31 @@ CShadowPointLight shadowPointLights[MAX_LIGHTS];
 #include "skybox.hpp"
 #include "environmental_mapping.hpp"
 
-const int FLOWER_COUNT = 100;
 struct RandomObjectInstance
 {
     glm::vec3 position;
     float scale;
     float angleY;
     glm::mat4 modelMatrix;
+    glm::vec3 colliderPosition;
+    float baseY;
+    float phase;
+
+    bool isCollectible = false;
+    bool collected = false;
 };
+
+const int FLOWER_COUNT = 100;
 std::vector<RandomObjectInstance> flowerInstances;
 
 const int TREES_COUNT = 50;
 std::vector<RandomObjectInstance> treeInstances;
 
+const int COLLECTIBLES_COUNT = 10;
+std::vector<RandomObjectInstance> collectibleInstances;
+
 #include "CCollider.hpp"
 std::vector<CSphereCollider *> sceneObjects;
-std::vector<CSphereCollider *> treeColliders;
 
 float fps = 0.0f;
 float fpsTimer = 0.0f;
@@ -169,6 +178,7 @@ void Initialize()
     float minZ = -20.0f;
     float maxZ = 20.0f;
 
+    __CHECK_FOR_ERRORS
     for (int i = 0; i < FLOWER_COUNT; ++i)
     {
         RandomObjectInstance fi;
@@ -185,6 +195,7 @@ void Initialize()
 
         flowerInstances.push_back(fi);
     }
+    __CHECK_FOR_ERRORS
 
     // DRZEWA
     tree.CreateFromOBJ("objs/tree.obj");
@@ -209,23 +220,58 @@ void Initialize()
         float colliderRadius = 0.5f * tr.scale;
         CSphereCollider *collider = new CSphereCollider(tr.position, colliderRadius, "tree" + std::to_string(i));
 
-        treeColliders.push_back(collider);
+        sceneObjects.push_back(collider);
+    }
+    __CHECK_FOR_ERRORS
+
+    // COLLECTIBLES
+    collectible.CreateFromOBJ("objs/donut.obj");
+    collectible.LoadTexture("assets/brick.jpg");
+
+    for (int i = 0; i < COLLECTIBLES_COUNT; ++i)
+    {
+        RandomObjectInstance col;
+        col.scale = 12.0f;
+        float x = minX + (maxX - minX) * (rand() / (float)RAND_MAX);
+        float z = minZ + (maxZ - minZ) * (rand() / (float)RAND_MAX);
+        float y = myGround.getHighestY(glm::vec2(x, z)) + 1.0f;
+        col.position = glm::vec3(x, y, z);
+        col.angleY = glm::radians(glm::linearRand(0.0f, 360.0f));
+
+        col.modelMatrix = glm::translate(glm::mat4(1.0f), col.position);
+        col.modelMatrix = glm::rotate(col.modelMatrix, col.angleY, glm::vec3(0, 1, 0));
+        col.modelMatrix = glm::scale(col.modelMatrix, glm::vec3(col.scale));
+
+        collectibleInstances.push_back(col);
+        col.isCollectible = true;
+
+        float colliderRadius = 0.5f;
+        col.colliderPosition = col.position;
+        col.colliderPosition.y -= 1.0f;
+        CSphereCollider *collider = new CSphereCollider(col.colliderPosition, colliderRadius, "collectible_" + std::to_string(i));
+
         sceneObjects.push_back(collider);
     }
 
     lightSphere.CreateFromOBJ("objs/sphere.obj");
     UpdateOrbitCamera();
+    __CHECK_FOR_ERRORS
 
     CreateSkyBox();
+    __CHECK_FOR_ERRORS
 
     // INICJALIZACJA MINIMAPY
     InitializeMiniMap();
+    __CHECK_FOR_ERRORS
 
     // INICJALIZACJA POSTPROCESSINGU
     InitPostProcess();
+    __CHECK_FOR_ERRORS
 
     // SHADOW MAP
     InitShadowMap();
+
+    __CHECK_FOR_ERRORS
 
     // environmental mapping
     InitEnvironmentMap();
@@ -401,6 +447,7 @@ void DisplayScene()
     glownyProgram.SetMat4("matModel", monkey.GetModelMatrix());
     glownyProgram.sendMaterialParameters(myMaterialBlysk);
     monkey.Draw(glownyProgram);
+    glownyProgram.SetFloat("envStrength", 0.0f);
 
     glownyProgram.sendMaterialParameters(myMaterialMatowy);
     // player
@@ -419,6 +466,32 @@ void DisplayScene()
     {
         glownyProgram.SetMat4("matModel", tr.modelMatrix);
         tree.Draw(glownyProgram);
+    }
+
+    // COLLECTIBLES
+    // for (int i = 0; i < collectibleInstances.size(); ++i)
+    // {
+    //     CSphereCollider *colCollider =
+    //         sceneObjects[1 + FLOWER_COUNT + TREES_COUNT + i];
+
+    //     if (!colCollider->active)
+    //         continue;
+
+    //     glownyProgram.SetMat4("matModel", collectibleInstances[i].modelMatrix);
+    //     collectible.Draw(glownyProgram);
+    // }
+
+    for (auto &col : collectibleInstances)
+    {
+        // ./if (col.collected) continue;
+
+        // float hover = sin(currentFrame + col.phase) * 0.3f;
+        // glm::vec3 pos = col.position;
+        // pos.y = col.baseY + hover;
+        // col.modelMatrix = glm::translate(col.modelMatrix, pos);
+
+        glownyProgram.SetMat4("matModel", col.modelMatrix);
+        collectible.Draw(glownyProgram);
     }
 
     // environmental mapping unifroms

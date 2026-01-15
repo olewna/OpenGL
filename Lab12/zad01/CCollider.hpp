@@ -18,6 +18,7 @@ class CCollider
 {
 public:
 	std::string debugName;
+	bool active = true;
 
 	CCollider(const std::string &name = "Unknown")
 		: debugName(name)
@@ -47,6 +48,9 @@ public:
 
 	virtual bool isCollision(const CCollider *_other) const
 	{
+		// if (!active || !_other->active)
+		// 	return false;
+
 		// sprawdzanie czy drugi kolider jest tego samego typu
 		if (dynamic_cast<const CSphereCollider *>(_other) == NULL)
 			printf("CSphereCollider: Wrong type!\n");
