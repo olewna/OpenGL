@@ -149,8 +149,11 @@ int fpsFrames = 0;
 // =======================================================
 void Initialize()
 {
+    __CHECK_FOR_ERRORS
     glEnable(GL_DEPTH_TEST);
+    __CHECK_FOR_ERRORS
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    __CHECK_FOR_ERRORS
     glClearColor(0, 0, 0, 1.0f);
     __CHECK_FOR_ERRORS
 
@@ -317,6 +320,12 @@ void DisplayScene()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     Time += 0.01;
+
+    // sprawdzanie czy czas nie minal
+    if (Time >= TIME_LIMIT && !gameWon)
+    {
+        gameLost = true;
+    }
 
     // FPS-y
     float currentFrame = glfwGetTime();
@@ -573,7 +582,7 @@ bool wasTPressed = false;
 
 void keyboard_handler()
 {
-    if (gameWon)
+    if (gameWon || gameLost)
         return;
 
     float speed = 0.1; // a moze uzaleznic od FPS?
@@ -647,11 +656,14 @@ int main()
     glfwSetCursorPosCallback(window, cursor_position_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    __CHECK_FOR_ERRORS
 
     framebuffer_size_callback(window, 800, 600);
+    __CHECK_FOR_ERRORS
 
     // IMGUI
     ImGui_Init(window);
+    __CHECK_FOR_ERRORS
 
     Initialize();
 

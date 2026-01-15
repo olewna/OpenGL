@@ -41,8 +41,10 @@ bool animationMonkey = true;
 bool useEnvMapping = false;
 
 int score = 0;
-const int CEL_GRY = 1;
+const int CEL_GRY = 15;
 bool gameWon = false;
+bool gameLost = false;
+const float TIME_LIMIT = 45.0f;
 
 // Naglowki funkcji
 void ImGui_Init(GLFWwindow *window);

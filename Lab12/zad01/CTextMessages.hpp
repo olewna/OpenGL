@@ -16,8 +16,8 @@ void showAllTexts(float currentFrame)
     int w, h;
     glfwGetFramebufferSize(window, &w, &h);
 
+    // NAPIS FPSY
     std::string fpsText = "FPS: " + std::to_string((int)fps);
-
     RenderText(
         fpsText,
         10.0f, // X ->
@@ -25,8 +25,8 @@ void showAllTexts(float currentFrame)
         2.0f,
         glm::vec3(1.0f, 0.0f, 0.0f)); // rgb kolor napisu
 
+    // NAPIS PUNKTÓW
     std::string scoreText = "SCORE: " + std::to_string((int)score) + "/" + std::to_string((int)CEL_GRY);
-
     RenderText(
         scoreText,
         10.0f,     // X ->
@@ -34,6 +34,7 @@ void showAllTexts(float currentFrame)
         2.0f,
         glm::vec3(0.0f, 0.0f, 1.0f));
 
+    // NAPIS CEL MISJI
     if (Time <= 2.5f)
     {
         std::string missionText = "COLLECT " + std::to_string((int)CEL_GRY) + " DONUTS!";
@@ -53,6 +54,7 @@ void showAllTexts(float currentFrame)
             glm::vec3(1.0f, alpha, 0.0f));
     }
 
+    // NAPIS GRA WYGRANA !!!!! YIPPII
     if (gameWon)
     {
         std::string winText = "YOU WIN!";
@@ -71,6 +73,41 @@ void showAllTexts(float currentFrame)
             scale,
             glm::vec3(1.0f, alpha, 0.0f));
     }
+
+    // NAPIS PRZEGRANA :((((((((((
+    if (gameLost)
+    {
+        std::string winText = "TIME IS OVER";
+
+        float scale = 5.0f;
+
+        float textWidth = winText.length() * 25.0f * scale;
+        float x = (w * 0.5f) - (textWidth * 0.25f);
+        float y = h * 0.5f;
+        float alpha = 0.5f + 0.5f * sin(currentFrame * 3.0f);
+
+        RenderText(
+            winText,
+            x,
+            y,
+            scale,
+            glm::vec3(alpha, 0.0f, 0.0f));
+    }
+
+    // NAPIS CZAS DO KOŃCA
+    float timeLeft = TIME_LIMIT - Time;
+    if (timeLeft < 0.0f)
+        timeLeft = 0.0f;
+
+    std::string timeText = "TIME LEFT: " + std::to_string((int)timeLeft);
+    float len = timeText.length();
+
+    RenderText(
+        timeText,
+        w - len * 27.0f,
+        h - 50.0f,
+        2.0f,
+        glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 #endif
