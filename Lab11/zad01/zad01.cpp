@@ -119,6 +119,7 @@ void Initialize()
         // "objs/ground-large.obj",
         // "objs/scene-plane.obj",
         "objs/scene-levels.obj",
+        // "objs/scene-large.obj",
         "assets/grass.jpg");
 
     tower.CreateFromOBJ("objs/tower.obj");
