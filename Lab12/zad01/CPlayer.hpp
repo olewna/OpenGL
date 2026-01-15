@@ -69,6 +69,11 @@ public:
         Update();
     }
 
+    glm::vec3 GetPosition() const
+    {
+        return Position;
+    }
+
     void Move(float speed, const std::vector<CSphereCollider *> &sceneCols)
     {
         // Position += Direction * speed;
@@ -102,6 +107,9 @@ public:
                 {
                     score++;
 
+                    if (score >= CEL_GRY)
+                        gameWon = true;
+
                     col->active = false;
                     std::cout << "Score: " << score << std::endl;
 
@@ -128,6 +136,11 @@ public:
         Direction.z = -sin(Angle);
 
         Update();
+    }
+
+    float GetAngle() const
+    {
+        return Angle;
     }
 
     bool CheckCollision(const CSphereCollider &other) const

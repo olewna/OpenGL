@@ -123,15 +123,26 @@ std::vector<RandomObjectInstance> flowerInstances;
 const int TREES_COUNT = 50;
 std::vector<RandomObjectInstance> treeInstances;
 
-const int COLLECTIBLES_COUNT = 10;
+const int COLLECTIBLES_COUNT = 25;
 std::vector<RandomObjectInstance> collectibleInstances;
 
 #include "CCollider.hpp"
 std::vector<CSphereCollider *> sceneObjects;
 
+enum class CameraMode
+{
+    ORBIT = 0,
+    THIRD_PERSON = 1
+};
+
+CameraMode cameraMode = CameraMode::THIRD_PERSON;
+#include "CCamera.hpp"
+
 float fps = 0.0f;
 float fpsTimer = 0.0f;
 int fpsFrames = 0;
+
+#include "CTextMessages.hpp"
 
 // =======================================================
 // INIT
@@ -141,9 +152,12 @@ void Initialize()
     glEnable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0, 0, 0, 1.0f);
+    __CHECK_FOR_ERRORS
 
     glownyProgram.Init();
+    __CHECK_FOR_ERRORS
     glownyProgram.LoadShaders("shaders/main/vertex.glsl", "shaders/main/fragment.glsl");
+    __CHECK_FOR_ERRORS
 
     // plane.CreateFromOBJ("objs/ground-large.obj");
     // plane.LoadTexture("assets/grass.jpg");
@@ -153,24 +167,30 @@ void Initialize()
         "objs/scene-levels.obj",
         // "objs/scene-large.obj",
         "assets/grass.jpg");
+    __CHECK_FOR_ERRORS
 
     tower.CreateFromOBJ("objs/tower.obj");
     tower.LoadTexture("assets/wood.jpg");
     tower.SetCollision(2.0f, "tower");
+    __CHECK_FOR_ERRORS
 
     sceneObjects.push_back(tower.GetCollision());
+    __CHECK_FOR_ERRORS
 
     monkey.CreateFromOBJ("objs/monke.obj");
     monkey.LoadTexture("assets/brick.jpg");
+    __CHECK_FOR_ERRORS
 
     myPlayer.Init(
         &myGround,
         "objs/lego.obj",
         "assets/lego.png");
+    __CHECK_FOR_ERRORS
 
     // KWIATY
     flower.CreateFromOBJ("objs/flower.obj");
     flower.LoadTexture("assets/flower32bit.png");
+    __CHECK_FOR_ERRORS
 
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     float minX = -20.0f;
@@ -254,7 +274,14 @@ void Initialize()
     }
 
     lightSphere.CreateFromOBJ("objs/sphere.obj");
-    UpdateOrbitCamera();
+    if (cameraMode == CameraMode::ORBIT)
+    {
+        UpdateOrbitCamera();
+    }
+    else if (cameraMode == CameraMode::THIRD_PERSON)
+    {
+        UpdateThirdPersonCamera(myPlayer);
+    }
     __CHECK_FOR_ERRORS
 
     CreateSkyBox();
@@ -306,7 +333,15 @@ void DisplayScene()
     }
 
     // KAMERA GŁÓWNA I KAMERA DLA SHADOW MAPY
-    UpdateOrbitCamera();
+    if (cameraMode == CameraMode::ORBIT)
+    {
+        UpdateOrbitCamera();
+    }
+    else if (cameraMode == CameraMode::THIRD_PERSON)
+    {
+        UpdateThirdPersonCamera(myPlayer);
+    }
+
     DirectionalLightCamera();
 
     // render shadowmap
@@ -474,7 +509,7 @@ void DisplayScene()
         CSphereCollider *colCollider =
             sceneObjects[1 + TREES_COUNT + i];
 
-        if (!colCollider->active)
+        if (!colCollider->active) // jeśli active == false
             continue;
 
         glownyProgram.SetMat4("matModel", collectibleInstances[i].modelMatrix);
@@ -531,30 +566,16 @@ void DisplayScene()
     RenderMiniMap();
     DisplayMiniMapOverlay();
 
-    int w, h;
-    glfwGetFramebufferSize(window, &w, &h);
-
-    std::string fpsText = "FPS: " + std::to_string((int)fps);
-
-    RenderText(
-        fpsText,
-        10.0f, // X ->
-        10.0f, // Y  V
-        2.0f,
-        glm::vec3(1.0f, 0.0f, 0.0f)); // rgb kolor napisu
-
-    std::string scoreText = "SCORE: " + std::to_string((int)score);
-
-    RenderText(
-        scoreText,
-        10.0f,     // X ->
-        h - 50.0f, // Y  V
-        2.0f,
-        glm::vec3(0.0f, 0.0f, 1.0f));
+    showAllTexts(currentFrame);
 }
+
+bool wasTPressed = false;
 
 void keyboard_handler()
 {
+    if (gameWon)
+        return;
+
     float speed = 0.1; // a moze uzaleznic od FPS?
     float rotate = 0.1f;
 
@@ -569,6 +590,20 @@ void keyboard_handler()
 
     if (__keys[GLFW_KEY_A])
         myPlayer.Rotate(rotate);
+
+    if (__keys[GLFW_KEY_T] && !wasTPressed)
+    {
+        cameraMode = (cameraMode == CameraMode::ORBIT)
+                         ? CameraMode::THIRD_PERSON
+                         : CameraMode::ORBIT;
+
+        wasTPressed = true;
+    }
+
+    if (!__keys[GLFW_KEY_T])
+    {
+        wasTPressed = false;
+    }
 }
 
 // =======================================================
