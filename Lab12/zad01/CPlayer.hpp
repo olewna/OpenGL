@@ -98,16 +98,16 @@ public:
 
             if (tempCollider.isCollision(col))
             {
-                // if (col->debugName.find("collectible") != std::string::npos)
-                // {
-                //     score++;
+                if (col->debugName.find("collectible") != std::string::npos)
+                {
+                    score++;
 
-                //     col->active = false;
-                //     std::cout << "Score: " << score << std::endl;
+                    col->active = false;
+                    std::cout << "Score: " << score << std::endl;
 
-                //     continue;
-                // }
-                // else
+                    continue;
+                }
+                else
                 {
                     std::cerr << "Player collides" << "\n";
                     return; // normalna kolizja

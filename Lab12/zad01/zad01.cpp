@@ -469,30 +469,30 @@ void DisplayScene()
     }
 
     // COLLECTIBLES
-    // for (int i = 0; i < collectibleInstances.size(); ++i)
-    // {
-    //     CSphereCollider *colCollider =
-    //         sceneObjects[1 + FLOWER_COUNT + TREES_COUNT + i];
-
-    //     if (!colCollider->active)
-    //         continue;
-
-    //     glownyProgram.SetMat4("matModel", collectibleInstances[i].modelMatrix);
-    //     collectible.Draw(glownyProgram);
-    // }
-
-    for (auto &col : collectibleInstances)
+    for (int i = 0; i < collectibleInstances.size(); ++i)
     {
-        // ./if (col.collected) continue;
+        CSphereCollider *colCollider =
+            sceneObjects[1 + TREES_COUNT + i];
 
-        // float hover = sin(currentFrame + col.phase) * 0.3f;
-        // glm::vec3 pos = col.position;
-        // pos.y = col.baseY + hover;
-        // col.modelMatrix = glm::translate(col.modelMatrix, pos);
+        if (!colCollider->active)
+            continue;
 
-        glownyProgram.SetMat4("matModel", col.modelMatrix);
+        glownyProgram.SetMat4("matModel", collectibleInstances[i].modelMatrix);
         collectible.Draw(glownyProgram);
     }
+
+    // for (auto &col : collectibleInstances)
+    // {
+    // ./if (col.collected) continue;
+
+    // float hover = sin(currentFrame + col.phase) * 0.3f;
+    // glm::vec3 pos = col.position;
+    // pos.y = col.baseY + hover;
+    // col.modelMatrix = glm::translate(col.modelMatrix, pos);
+
+    //     glownyProgram.SetMat4("matModel", col.modelMatrix);
+    //     collectible.Draw(glownyProgram);
+    // }
 
     // environmental mapping unifroms
     glownyProgram.SetInt("uUseEnvMap", useEnvMapping ? 1 : 0);
@@ -542,6 +542,15 @@ void DisplayScene()
         10.0f, // Y  V
         2.0f,
         glm::vec3(1.0f, 0.0f, 0.0f)); // rgb kolor napisu
+
+    std::string scoreText = "SCORE: " + std::to_string((int)score);
+
+    RenderText(
+        scoreText,
+        10.0f,     // X ->
+        h - 50.0f, // Y  V
+        2.0f,
+        glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void keyboard_handler()

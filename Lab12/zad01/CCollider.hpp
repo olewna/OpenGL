@@ -48,8 +48,8 @@ public:
 
 	virtual bool isCollision(const CCollider *_other) const
 	{
-		// if (!active || !_other->active)
-		// 	return false;
+		if (!active || !_other->active)
+			return false;
 
 		// sprawdzanie czy drugi kolider jest tego samego typu
 		if (dynamic_cast<const CSphereCollider *>(_other) == NULL)
